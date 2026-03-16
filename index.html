@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台灣蔬菜批發行情</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #070910;
+    --surface: #10131a;
+    --surface2: #161b26;
+    --border: #1e2535;
+    --cyan: #00e5e5;
+    --cyan-dim: rgba(0,229,229,0.12);
+    --purple: #a855f7;
+    --purple-dim: rgba(168,85,247,0.12);
+    --green: #22d3a4;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --muted2: #94a3b8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Pro Display', -apple-system, 'PingFang TC', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .hero {
+    background: linear-gradient(135deg, #0a0f1e 0%, #0d1524 50%, #0a0f1e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,229,229,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -40px;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hero-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 12px rgba(0,229,229,0.4));
+  }
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan) 0%, #7dd3fc 60%, var(--purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-top: 0.3rem;
+  }
+  .hero-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .market-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .market-select:hover, .market-select:focus { border-color: var(--cyan); }
+  .date-display {
+    color: var(--muted);
+    font-size: 0.82rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+  }
+  .refresh-btn {
+    background: var(--cyan-dim);
+    border: 1px solid rgba(0,229,229,0.25);
+    border-radius: 8px;
+    color: var(--cyan);
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(0,229,229,0.2); }
+
+  /* Main */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: pulse 2s infinite;
+  }
+  .status-dot.active { background: var(--green); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+  .section-header:first-child { margin-top: 0; }
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+
+  /* Top cards */
+  .top-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  .top-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .top-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--cyan);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .top-card:hover, .top-card.active {
+    border-color: var(--cyan);
+    box-shadow: 0 0 20px rgba(0,229,229,0.08);
+  }
+  .top-card:hover::before, .top-card.active::before { opacity: 1; }
+  .card-rank {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .card-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--cyan);
+    line-height: 1;
+  }
+  .card-unit { font-size: 0.7rem; color: var(--muted); margin-left: 0.2rem; }
+  .card-change {
+    font-size: 0.78rem;
+    margin-top: 0.4rem;
+    font-weight: 600;
+  }
+  .card-change.up { color: var(--red); }
+  .card-change.down { color: var(--green); }
+  .card-change.flat { color: var(--muted2); }
+  .card-vol {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* Chart section */
+  .chart-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+  .chart-section.visible { display: block; }
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .chart-subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .chart-days-selector {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .day-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .day-btn:hover, .day-btn.active {
+    background: var(--cyan-dim);
+    border-color: rgba(0,229,229,0.3);
+    color: var(--cyan);
+  }
+  .chart-wrap { position: relative; height: 220px; }
+
+  /* Table */
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  .price-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .price-table td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid rgba(30,37,53,0.5);
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .price-table tr:last-child td { border-bottom: none; }
+  .price-table tr:hover td { background: var(--surface2); }
+  .price-table tr { cursor: pointer; }
+  .price-table .name-cell { font-weight: 500; }
+  .price-table .price-cell { font-weight: 600; color: var(--cyan); }
+  .price-table .vol-cell { color: var(--muted2); font-size: 0.82rem; }
+  .change-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+  .change-badge.up { background: rgba(248,113,113,0.1); color: var(--red); }
+  .change-badge.down { background: rgba(34,211,164,0.1); color: var(--green); }
+  .change-badge.flat { background: rgba(100,116,139,0.1); color: var(--muted); }
+
+  /* Table wrapper */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Loading */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--muted);
+    gap: 0.75rem;
+  }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    padding: 2.5rem 2rem 1.5rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+  footer a { color: var(--muted2); text-decoration: none; }
+  footer a:hover { color: var(--cyan); }
+
+  /* Range badges */
+  .range-row {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+  .range-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 1.5rem 1rem 1.2rem; }
+    .main { padding: 1.2rem 1rem; }
+    h1 { font-size: 1.4rem; }
+    .top-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-title">
+        <span class="hero-icon">🥬</span>
+        <div>
+          <h1>台灣蔬菜批發行情</h1>
+          <div class="hero-sub">農產品批發市場即時價格 · 資料來源：農業部農產行情站</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-controls">
+      <select class="market-select" id="marketSelect">
+        <option value="台北一">台北一</option>
+        <option value="台北二">台北二</option>
+        <option value="板橋區">板橋區</option>
+        <option value="台中市">台中市</option>
+        <option value="高雄市">高雄市</option>
+        <option value="西螺鎮">西螺鎮</option>
+        <option value="溪湖鎮">溪湖鎮</option>
+      </select>
+      <div class="date-display" id="dateDisplay">載入中...</div>
+      <button class="refresh-btn" onclick="loadData()">↻ 更新</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">連接中...</span>
+  </div>
+
+  <div id="topCardsSection">
+    <div class="section-header">
+      <span class="section-label">交易量前排</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="top-cards" id="topCards">
+      <div class="loading"><div class="spinner"></div>載入中...</div>
+    </div>
+  </div>
+
+  <div class="chart-section" id="chartSection">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title" id="chartTitle">—</div>
+        <div class="chart-subtitle" id="chartSubtitle">—</div>
+      </div>
+      <div class="chart-days-selector">
+        <button class="day-btn active" data-days="7" onclick="selectDays(7, this)">7日</button>
+        <button class="day-btn" data-days="14" onclick="selectDays(14, this)">14日</button>
+        <button class="day-btn" data-days="30" onclick="selectDays(30, this)">30日</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="priceChart"></canvas>
+    </div>
+  </div>
+
+  <div class="section-header" style="margin-top: 2rem;">
+    <span class="section-label">完整蔬菜列表</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>作物</th>
+          <th>均價 (元/kg)</th>
+          <th>上/下價</th>
+          <th>週漲跌</th>
+          <th>交易量 (kg)</th>
+        </tr>
+      </thead>
+      <tbody id="priceTableBody">
+        <tr><td colspan="6"><div class="loading"><div class="spinner"></div>載入中...</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <p>資料來源：<a href="https://data.moa.gov.tw/" target="_blank">農業部農業數據中心</a>　·　每日市場交易後更新　·　僅含蔬菜類 (N04)</p>
+  <p style="margin-top:0.4rem">台北市場週一至週六交易，週日休市</p>
+</footer>
+
+<script>
+// ─── Date Utilities ───────────────────────────────────────────
+function toROC(date) {
+  const y = date.getFullYear() - 1911;
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}.${m}.${d}`;
+}
+function fromROC(s) {
+  const [y, m, d] = s.split('.');
+  return new Date(parseInt(y) + 1911, parseInt(m) - 1, parseInt(d));
+}
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function getRecentTradingDays(n) {
+  const days = [];
+  let d = new Date();
+  // Try up to n+14 days back to get n trading days
+  for (let i = 0; i < n + 20 && days.length < n; i++) {
+    const check = addDays(d, -i);
+    if (check.getDay() !== 0) { // skip Sunday
+      days.push(check);
+    }
+  }
+  return days;
+}
+function fmtDisplay(rocDate) {
+  const d = fromROC(rocDate);
+  const wdays = ['日','一','二','三','四','五','六'];
+  return `${rocDate.replace(/\./g,'/')} (${wdays[d.getDay()]})`;
+}
+
+// ─── API ─────────────────────────────────────────────────────
+const API = 'https://data.moa.gov.tw/Service/OpenData/FromM/FarmTransData.aspx';
+async function fetchDay(rocDate) {
+  const url = `${API}?StartDate=${rocDate}&EndDate=${rocDate}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ─── State ───────────────────────────────────────────────────
+let state = {
+  market: '台北一',
+  todayData: [],
+  prevData: [],
+  todayDate: null,
+  prevDate: null,
+  selectedCrop: null,
+  chartDays: 7,
+  chartInstance: null,
+  chartCache: {},
+};
+
+// ─── Data Loading ─────────────────────────────────────────────
+async function loadData() {
+  setStatus('loading');
+  document.getElementById('topCards').innerHTML = '<div class="loading"><div class="spinner"></div>連接農業資料庫...</div>';
+  document.getElementById('priceTableBody').innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  document.getElementById('chartSection').classList.remove('visible');
+
+  try {
+    // Find last 2 trading days with actual data
+    const candidates = getRecentTradingDays(7);
+    let found = 0;
+    let todayRec = null, prevRec = null;
+
+    for (const day of candidates) {
+      const roc = toROC(day);
+      const data = await fetchDay(roc);
+      const vegs = data.filter(d => d['種類代碼'] === 'N04');
+      if (vegs.length === 0) continue;
+      if (found === 0) { todayRec = { date: roc, data: vegs }; found++; }
+      else if (found === 1) { prevRec = { date: roc, data: vegs }; break; }
+    }
+
+    if (!todayRec) throw new Error('找不到近期交易資料');
+    state.todayDate = todayRec.date;
+    state.todayData = todayRec.data;
+    state.prevData = prevRec ? prevRec.data : [];
+    state.prevDate = prevRec ? prevRec.date : null;
+    state.chartCache = {};
+
+    document.getElementById('dateDisplay').textContent = fmtDisplay(state.todayDate);
+    setStatus('active');
+    render();
+  } catch (e) {
+    setStatus('error', e.message);
+    document.getElementById('topCards').innerHTML = `<div class="loading" style="color:var(--red)">⚠ ${e.message}</div>`;
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────
+function getMarketData(data, market) {
+  return data.filter(d => d['市場名稱'] === market);
+}
+function aggregateCrops(data) {
+  const map = {};
+  for (const d of data) {
+    const name = d['作物名稱'];
+    if (!name || name === '其他' || name === '休市') continue;
+    if (!map[name]) map[name] = { avg: 0, high: 0, low: 0, vol: 0, count: 0 };
+    const vol = parseFloat(d['交易量']) || 0;
+    const avg = parseFloat(d['平均價']) || 0;
+    map[name].vol += vol;
+    map[name].avg = (map[name].avg * map[name].count + avg) / (map[name].count + 1);
+    map[name].high = Math.max(map[name].high, parseFloat(d['上價']) || 0);
+    map[name].low = map[name].low === 0 ? parseFloat(d['下價']) || 0 : Math.min(map[name].low, parseFloat(d['下價']) || 999);
+    map[name].count++;
+  }
+  return Object.entries(map).map(([name, v]) => ({ name, ...v }))
+    .filter(r => r.vol > 0)
+    .sort((a, b) => b.vol - a.vol);
+}
+function calcChange(todayCrops, prevCrops) {
+  const prevMap = {};
+  for (const c of prevCrops) prevMap[c.name] = c.avg;
+  return todayCrops.map(c => {
+    const prev = prevMap[c.name];
+    const pct = prev ? ((c.avg - prev) / prev * 100) : null;
+    return { ...c, prevAvg: prev || null, changePct: pct };
+  });
+}
+function changeClass(pct) {
+  if (pct === null) return 'flat';
+  if (pct > 1) return 'up';
+  if (pct < -1) return 'down';
+  return 'flat';
+}
+function changeLabel(pct) {
+  if (pct === null) return '—';
+  const sign = pct >= 0 ? '▲' : '▼';
+  return `${sign}${Math.abs(pct).toFixed(1)}%`;
+}
+function fmtVol(v) {
+  if (v >= 1000) return `${(v/1000).toFixed(1)}t`;
+  return `${Math.round(v)}kg`;
+}
+
+function render() {
+  const todayMkt = getMarketData(state.todayData, state.market);
+  const prevMkt = getMarketData(state.prevData, state.market);
+  const today = aggregateCrops(todayMkt);
+  const prev = aggregateCrops(prevMkt);
+  const crops = calcChange(today, prev);
+
+  renderTopCards(crops.slice(0, 6));
+  renderTable(crops);
+}
+
+function renderTopCards(crops) {
+  const container = document.getElementById('topCards');
+  if (crops.length === 0) {
+    container.innerHTML = '<div class="loading" style="color:var(--muted)">此市場今日無資料</div>';
+    return;
+  }
+  container.innerHTML = crops.map((c, i) => {
+    const cls = changeClass(c.changePct);
+    const isActive = state.selectedCrop === c.name ? ' active' : '';
+    return `
+    <div class="top-card${isActive}" onclick="selectCrop('${c.name.replace(/'/g,'\\'')}')">
+      <div class="card-rank">#${i+1} 交易量排行</div>
+      <div class="card-name" title="${c.name}">${c.name}</div>
+      <div>
+        <span class="card-price">${c.avg.toFixed(1)}</span>
+        <span class="card-unit">元/kg</span>
+      </div>
+      <div class="card-change ${cls}">${changeLabel(c.changePct)}</div>
+      <div class="card-vol">${fmtVol(c.vol)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(crops) {
+  const tbody = document.getElementById('priceTableBody');
+  if (crops.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">此市場今日無蔬菜資料</td></tr>';
+    return;
+  }
+  tbody.innerHTML = crops.map((c, i) => {
+    const cls = changeClass(c.changePct);
+    return `
+    <tr onclick="selectCrop('${c.name.replace(/'/g,'\\'')}')">
+      <td style="color:var(--muted);font-size:0.8rem">${i+1}</td>
+      <td class="name-cell">${c.name}</td>
+      <td class="price-cell">${c.avg.toFixed(1)}</td>
+      <td class="vol-cell">${c.high.toFixed(1)} / ${c.low.toFixed(1)}</td>
+      <td><span class="change-badge ${cls}">${changeLabel(c.changePct)}</span></td>
+      <td class="vol-cell">${fmtVol(c.vol)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── Chart ────────────────────────────────────────────────────
+async function selectCrop(name) {
+  state.selectedCrop = name;
+  // Update active state
+  document.querySelectorAll('.top-card').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.top-card').forEach(el => {
+    if (el.querySelector('.card-name')?.textContent === name) el.classList.add('active');
+  });
+  document.getElementById('chartSection').classList.add('visible');
+  await loadChartData(name, state.chartDays);
+}
+
+async function selectDays(n, btn) {
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.chartDays = n;
+  if (state.selectedCrop) await loadChartData(state.selectedCrop, n);
+}
+
+async function loadChartData(name, days) {
+  const cacheKey = `${name}__${days}__${state.market}`;
+  document.getElementById('chartTitle').textContent = name;
+  document.getElementById('chartSubtitle').textContent = `${state.market} · 過去 ${days} 個交易日 · 均價 (元/kg)`;
+
+  let points;
+  if (state.chartCache[cacheKey]) {
+    points = state.chartCache[cacheKey];
+  } else {
+    // Show loading in chart
+    document.getElementById('chartSubtitle').textContent = `載入中...`;
+    const tradingDays = getRecentTradingDays(days + 5).slice(0, days + 5);
+    const results = [];
+    for (const day of tradingDays) {
+      if (results.length >= days) break;
+      const roc = toROC(day);
+      try {
+        let data;
+        // Use already-fetched data if it's today or prev date
+        if (roc === state.todayDate) data = state.todayData;
+        else if (roc === state.prevDate) data = state.prevData;
+        else {
+          const raw = await fetchDay(roc);
+          data = raw.filter(d => d['種類代碼'] === 'N04');
+        }
+        const mktData = getMarketData(data, state.market);
+        const crops = aggregateCrops(mktData);
+        const crop = crops.find(c => c.name === name);
+        if (crop) results.push({ date: roc, avg: crop.avg, high: crop.high, low: crop.low });
+      } catch(e) { /* skip */ }
+    }
+    points = results.reverse();
+    state.chartCache[cacheKey] = points;
+    document.getElementById('chartSubtitle').textContent = `${state.market} · 過去 ${days} 個交易日 · 均價 (元/kg)`;
+  }
+
+  drawChart(points);
+}
+
+function drawChart(points) {
+  const labels = points.map(p => p.date.replace(/^1\d{2}\./, '').replace('.', '/'));
+  const avgs = points.map(p => p.avg);
+
+  if (state.chartInstance) state.chartInstance.destroy();
+
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, 'rgba(0,229,229,0.25)');
+  gradient.addColorStop(1, 'rgba(0,229,229,0)');
+
+  state.chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: avgs,
+        borderColor: '#00e5e5',
+        borderWidth: 2,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        pointBackgroundColor: '#00e5e5',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#161b26',
+          borderColor: '#1e2535',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#00e5e5',
+          bodyFont: { size: 14, weight: '700' },
+          callbacks: {
+            label: ctx => ` ${ctx.raw.toFixed(1)} 元/kg`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(30,37,53,0.8)' },
+          ticks: { color: '#64748b', font: { size: 11 } },
+        },
+        y: {
+          grid: { color: 'rgba(30,37,53,0.8)' },
+          ticks: { color: '#64748b', font: { size: 11 }, callback: v => `$${v}` },
+          beginAtZero: false,
+        }
+      }
+    }
+  });
+}
+
+// ─── Status ───────────────────────────────────────────────────
+function setStatus(type, msg) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  dot.className = 'status-dot';
+  if (type === 'active') {
+    dot.classList.add('active');
+    text.textContent = `資料已更新・${state.market}・${state.todayDate ? fmtDisplay(state.todayDate) : ''}`;
+  } else if (type === 'loading') {
+    text.textContent = '連接農業資料庫中...';
+  } else {
+    text.textContent = `錯誤：${msg}`;
+  }
+}
+
+// ─── Market Change ────────────────────────────────────────────
+document.getElementById('marketSelect').addEventListener('change', function() {
+  state.market = this.value;
+  state.selectedCrop = null;
+  state.chartCache = {};
+  document.getElementById('chartSection').classList.remove('visible');
+  render();
+  setStatus('active');
+});
+
+// ─── Init ─────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
