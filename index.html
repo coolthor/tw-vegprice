@@ -549,44 +549,52 @@ async function loadData() {
   document.getElementById('chartSection').classList.remove('visible');
 
   try {
-    // Try 2 days at a time until we find 2 with data (server already filters to N04)
+    // Step 1: find the most recent trading day with data (sequential, 1 at a time)
     const candidates = getRecentTradingDays(7);
     let todayRec = null, prevRec = null;
 
-    for (let i = 0; i < candidates.length - 1; i += 2) {
-      const batch = candidates.slice(i, i + 2);
-      const results = await Promise.all(
-        batch.map(async day => {
-          const roc = toROC(day);
-          try {
-            const data = await fetchDay(roc);
-            const vegs = Array.isArray(data) ? data : [];
-            return { date: roc, data: vegs, ok: vegs.length > 0 };
-          } catch {
-            return { date: roc, data: [], ok: false };
-          }
-        })
-      );
-      for (const r of results) {
-        if (!r.ok) continue;
-        if (!todayRec) todayRec = r;
-        else if (!prevRec) { prevRec = r; break; }
-      }
-      if (todayRec && prevRec) break;
+    for (const day of candidates) {
+      const roc = toROC(day);
+      try {
+        const data = await fetchDay(roc);
+        const vegs = Array.isArray(data) ? data : [];
+        if (vegs.length === 0) continue;
+        todayRec = { date: roc, data: vegs };
+        break;
+      } catch { continue; }
     }
 
     if (!todayRec) throw new Error('近期無交易資料（可能市場休市）');
 
-    if (!todayRec) throw new Error('找不到近期交易資料');
+    // Step 2: render immediately with today's data
     state.todayDate = todayRec.date;
     state.todayData = todayRec.data;
-    state.prevData = prevRec ? prevRec.data : [];
-    state.prevDate = prevRec ? prevRec.date : null;
+    state.prevData = [];
+    state.prevDate = null;
     state.chartCache = {};
-
     document.getElementById('dateDisplay').textContent = fmtDisplay(state.todayDate);
     setStatus('active');
     render();
+
+    // Step 3: background-fetch previous day for comparison
+    const todayIdx = candidates.findIndex(d => toROC(d) === todayRec.date);
+    for (const day of candidates.slice(todayIdx + 1)) {
+      const roc = toROC(day);
+      try {
+        const data = await fetchDay(roc);
+        const vegs = Array.isArray(data) ? data : [];
+        if (vegs.length === 0) continue;
+        prevRec = { date: roc, data: vegs };
+        break;
+      } catch { continue; }
+    }
+
+    // Update with previous day and re-render with comparison data
+    if (prevRec) {
+      state.prevData = prevRec.data;
+      state.prevDate = prevRec.date;
+      render(); // re-render with change % now available
+    }
   } catch (e) {
     setStatus('error', e.message);
     document.getElementById('topCards').innerHTML = `<div class="loading" style="color:var(--red)">⚠ ${e.message}</div>`;
