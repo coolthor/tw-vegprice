@@ -18,9 +18,9 @@ export default async function handler(req) {
     });
     const raw = await res.json();
 
-    // Filter to vegetables only (N04), drop unused fields → ~80KB instead of 600KB
+    // Filter: vegetables only (N04), exclude 休市 / zero-volume entries, keep needed fields
     const data = raw
-      .filter(d => d['種類代碼'] === 'N04')
+      .filter(d => d['種類代碼'] === 'N04' && d['作物名稱'] !== '休市' && parseFloat(d['交易量']) > 0)
       .map(d => {
         const out = {};
         for (const k of KEEP_FIELDS) out[k] = d[k];

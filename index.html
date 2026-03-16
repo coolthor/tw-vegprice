@@ -637,11 +637,31 @@ function fmtVol(v) {
 }
 
 function render() {
-  const todayMkt = getMarketData(state.todayData, state.market);
+  let todayMkt = getMarketData(state.todayData, state.market);
+  let todayCrops = aggregateCrops(todayMkt);
+  let displayDate = state.todayDate;
+  let isFallback = false;
+
+  // If selected market has no data today, fall back to previous day
+  if (todayCrops.length === 0 && state.prevData.length > 0) {
+    const prevMkt = getMarketData(state.prevData, state.market);
+    const prevCrops = aggregateCrops(prevMkt);
+    if (prevCrops.length > 0) {
+      todayCrops = prevCrops;
+      displayDate = state.prevDate;
+      isFallback = true;
+    }
+  }
+
   const prevMkt = getMarketData(state.prevData, state.market);
-  const today = aggregateCrops(todayMkt);
-  const prev = aggregateCrops(prevMkt);
-  const crops = calcChange(today, prev);
+  const prevCrops = aggregateCrops(prevMkt);
+  const crops = isFallback ? todayCrops : calcChange(todayCrops, prevCrops);
+
+  // Update status to reflect actual displayed date
+  const notice = isFallback
+    ? `顯示 ${fmtDisplay(displayDate)} 資料（${fmtDisplay(state.todayDate)} ${state.market} 休市）`
+    : `資料已更新・${state.market}・${fmtDisplay(state.todayDate)}`;
+  document.getElementById('statusText').textContent = notice;
 
   renderTopCards(crops.slice(0, 6));
   renderTable(crops);
