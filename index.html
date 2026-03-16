@@ -542,12 +542,10 @@ let state = {
 };
 
 // ─── Data Loading ─────────────────────────────────────────────
-function lastTwoTradingDays() {
-  // Returns [mostRecent, previousDay] as ROC date strings
-  // Skips Sunday (day 0)
+function recentNonSundays(n) {
   const days = [];
   const d = new Date();
-  for (let i = 0; days.length < 2; i++) {
+  for (let i = 0; days.length < n; i++) {
     const check = addDays(d, -i);
     if (check.getDay() !== 0) days.push(toROC(check));
   }
@@ -561,24 +559,24 @@ async function loadData() {
   document.getElementById('chartSection').classList.remove('visible');
   state.chartCache = {};
 
-  const [d0, d1] = lastTwoTradingDays();
-
   try {
-    // Fetch both days in parallel
-    const [data0, data1] = await Promise.all([fetchDay(d0), fetchDay(d1)]);
+    // Fetch last 5 non-Sunday days in parallel, pick 2 most recent with actual data
+    const candidates = recentNonSundays(5);
+    const results = await Promise.all(
+      candidates.map(roc =>
+        fetchDay(roc)
+          .then(data => ({ roc, data, ok: data.length > 0 }))
+          .catch(() => ({ roc, data: [], ok: false }))
+      )
+    );
 
-    // If today (d0) is holiday → 0 records, fall back to d1 as "today" and fetch d2
-    if (data0.length === 0) {
-      const d2 = toROC(addDays(new Date(lastTwoTradingDays()[1].replace(/(\d+)\.(\d+)\.(\d+)/, (_, y,m,d) => `${+y+1911}-${m}-${d}`)), -1));
-      const data2 = await fetchDay(d2).catch(() => []);
-      state.todayDate = d1; state.todayData = data1;
-      state.prevDate = data2.length ? d2 : null;
-      state.prevData = data2;
-    } else {
-      state.todayDate = d0; state.todayData = data0;
-      state.prevDate = data1.length ? d1 : null;
-      state.prevData = data1;
-    }
+    const withData = results.filter(r => r.ok);
+    if (withData.length === 0) throw new Error('近期 5 個交易日均無蔬菜資料');
+
+    state.todayDate = withData[0].roc;
+    state.todayData = withData[0].data;
+    state.prevDate  = withData[1] ? withData[1].roc  : null;
+    state.prevData  = withData[1] ? withData[1].data : [];
 
     document.getElementById('dateDisplay').textContent = fmtDisplay(state.todayDate);
     setStatus('active');
