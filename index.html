@@ -521,11 +521,11 @@ function fmtDisplay(rocDate) {
 // ─── API ─────────────────────────────────────────────────────
 async function fetchDay(rocDate) {
   const url = `/api/prices?date=${rocDate}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data;
+  if (data && data.error) throw new Error(data.error);
+  return Array.isArray(data) ? data : [];
 }
 
 // ─── State ───────────────────────────────────────────────────
@@ -542,62 +542,52 @@ let state = {
 };
 
 // ─── Data Loading ─────────────────────────────────────────────
+function lastTwoTradingDays() {
+  // Returns [mostRecent, previousDay] as ROC date strings
+  // Skips Sunday (day 0)
+  const days = [];
+  const d = new Date();
+  for (let i = 0; days.length < 2; i++) {
+    const check = addDays(d, -i);
+    if (check.getDay() !== 0) days.push(toROC(check));
+  }
+  return days;
+}
+
 async function loadData() {
   setStatus('loading');
   document.getElementById('topCards').innerHTML = '<div class="loading"><div class="spinner"></div>連接農業資料庫...</div>';
   document.getElementById('priceTableBody').innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
   document.getElementById('chartSection').classList.remove('visible');
+  state.chartCache = {};
+
+  const [d0, d1] = lastTwoTradingDays();
 
   try {
-    // Step 1: find the most recent trading day with data (sequential, 1 at a time)
-    const candidates = getRecentTradingDays(7);
-    let todayRec = null, prevRec = null;
+    // Fetch both days in parallel
+    const [data0, data1] = await Promise.all([fetchDay(d0), fetchDay(d1)]);
 
-    for (const day of candidates) {
-      const roc = toROC(day);
-      try {
-        const data = await fetchDay(roc);
-        const vegs = Array.isArray(data) ? data : [];
-        if (vegs.length === 0) continue;
-        todayRec = { date: roc, data: vegs };
-        break;
-      } catch { continue; }
+    // If today (d0) is holiday → 0 records, fall back to d1 as "today" and fetch d2
+    if (data0.length === 0) {
+      const d2 = toROC(addDays(new Date(lastTwoTradingDays()[1].replace(/(\d+)\.(\d+)\.(\d+)/, (_, y,m,d) => `${+y+1911}-${m}-${d}`)), -1));
+      const data2 = await fetchDay(d2).catch(() => []);
+      state.todayDate = d1; state.todayData = data1;
+      state.prevDate = data2.length ? d2 : null;
+      state.prevData = data2;
+    } else {
+      state.todayDate = d0; state.todayData = data0;
+      state.prevDate = data1.length ? d1 : null;
+      state.prevData = data1;
     }
 
-    if (!todayRec) throw new Error('近期無交易資料（可能市場休市）');
-
-    // Step 2: render immediately with today's data
-    state.todayDate = todayRec.date;
-    state.todayData = todayRec.data;
-    state.prevData = [];
-    state.prevDate = null;
-    state.chartCache = {};
     document.getElementById('dateDisplay').textContent = fmtDisplay(state.todayDate);
     setStatus('active');
     render();
-
-    // Step 3: background-fetch previous day for comparison
-    const todayIdx = candidates.findIndex(d => toROC(d) === todayRec.date);
-    for (const day of candidates.slice(todayIdx + 1)) {
-      const roc = toROC(day);
-      try {
-        const data = await fetchDay(roc);
-        const vegs = Array.isArray(data) ? data : [];
-        if (vegs.length === 0) continue;
-        prevRec = { date: roc, data: vegs };
-        break;
-      } catch { continue; }
-    }
-
-    // Update with previous day and re-render with comparison data
-    if (prevRec) {
-      state.prevData = prevRec.data;
-      state.prevDate = prevRec.date;
-      render(); // re-render with change % now available
-    }
   } catch (e) {
-    setStatus('error', e.message);
-    document.getElementById('topCards').innerHTML = `<div class="loading" style="color:var(--red)">⚠ ${e.message}</div>`;
+    const msg = e.message || String(e);
+    setStatus('error', msg);
+    document.getElementById('topCards').innerHTML = `<div class="loading" style="color:var(--red)">⚠ 載入失敗：${msg}</div>`;
+    document.getElementById('priceTableBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:2rem">⚠ ${msg}</td></tr>`;
   }
 }
 
