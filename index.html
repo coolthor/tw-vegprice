@@ -549,25 +549,33 @@ async function loadData() {
   document.getElementById('chartSection').classList.remove('visible');
 
   try {
-    // Parallel fetch last 7 non-Sunday days, then pick 2 most recent with veg data
+    // Try 2 days at a time until we find 2 with data (server already filters to N04)
     const candidates = getRecentTradingDays(7);
-    const results = await Promise.all(
-      candidates.map(async day => {
-        const roc = toROC(day);
-        try {
-          const data = await fetchDay(roc);
-          const vegs = Array.isArray(data) ? data.filter(d => d['種類代碼'] === 'N04') : [];
-          return { date: roc, data: vegs, ok: vegs.length > 0 };
-        } catch {
-          return { date: roc, data: [], ok: false };
-        }
-      })
-    );
+    let todayRec = null, prevRec = null;
 
-    const withData = results.filter(r => r.ok);
-    if (withData.length === 0) throw new Error('近期無交易資料（可能市場休市）');
-    const todayRec = withData[0];
-    const prevRec = withData[1] || null;
+    for (let i = 0; i < candidates.length - 1; i += 2) {
+      const batch = candidates.slice(i, i + 2);
+      const results = await Promise.all(
+        batch.map(async day => {
+          const roc = toROC(day);
+          try {
+            const data = await fetchDay(roc);
+            const vegs = Array.isArray(data) ? data : [];
+            return { date: roc, data: vegs, ok: vegs.length > 0 };
+          } catch {
+            return { date: roc, data: [], ok: false };
+          }
+        })
+      );
+      for (const r of results) {
+        if (!r.ok) continue;
+        if (!todayRec) todayRec = r;
+        else if (!prevRec) { prevRec = r; break; }
+      }
+      if (todayRec && prevRec) break;
+    }
+
+    if (!todayRec) throw new Error('近期無交易資料（可能市場休市）');
 
     if (!todayRec) throw new Error('找不到近期交易資料');
     state.todayDate = todayRec.date;
@@ -726,7 +734,7 @@ async function loadChartData(name, days) {
           else if (roc === state.prevDate) data = state.prevData;
           else {
             const raw = await fetchDay(roc);
-            data = Array.isArray(raw) ? raw.filter(d => d['種類代碼'] === 'N04') : [];
+            data = Array.isArray(raw) ? raw : [];
           }
           const mktData = getMarketData(data, state.market);
           const crops = aggregateCrops(mktData);

@@ -1,10 +1,12 @@
 export const config = { runtime: 'edge' };
 
+const KEEP_FIELDS = ['交易日期', '作物名稱', '市場名稱', '上價', '中價', '下價', '平均價', '交易量'];
+
 export default async function handler(req) {
   const { searchParams } = new URL(req.url);
   const date = searchParams.get('date');
-  if (!date) {
-    return new Response(JSON.stringify({ error: 'missing date' }), { status: 400 });
+  if (!date || !/^\d{3}\.\d{2}\.\d{2}$/.test(date)) {
+    return new Response(JSON.stringify({ error: 'invalid date' }), { status: 400 });
   }
 
   const url = `https://data.moa.gov.tw/Service/OpenData/FromM/FarmTransData.aspx?StartDate=${date}&EndDate=${date}`;
@@ -14,11 +16,21 @@ export default async function handler(req) {
       signal: AbortSignal.timeout(12000),
       headers: { 'Accept': 'application/json' },
     });
-    const data = await res.json();
+    const raw = await res.json();
+
+    // Filter to vegetables only (N04), drop unused fields → ~80KB instead of 600KB
+    const data = raw
+      .filter(d => d['種類代碼'] === 'N04')
+      .map(d => {
+        const out = {};
+        for (const k of KEEP_FIELDS) out[k] = d[k];
+        return out;
+      });
+
     return new Response(JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        'Cache-Control': 'public, s-maxage=7200, stale-while-revalidate=86400',
         'Access-Control-Allow-Origin': '*',
       },
     });
