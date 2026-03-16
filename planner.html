@@ -217,14 +217,14 @@ const CROPS = [
   { id:'radish',    name:'蘿蔔-矸仔',    family:'brassica',    cycle:70,  ph:[5.8,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['beginner','mid','expert'], diff:1, notes:'砂壤最佳，黏土易歪根',   typhoon:[7,8,9], cold:[],      yieldPerTan:1200, price:{1:11.1,2:9.3,3:8.9,4:10.3,5:10.0,6:11.2,7:13.9,8:27.8,9:25.1,10:12.8,11:15.2,12:13.7} },
   { id:'napa',      name:'包心白-包白',  family:'brassica',    cycle:75,  ph:[6.0,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'夏季易軟腐，秋冬較穩', typhoon:[7,8,9], cold:[],      yieldPerTan:1000, price:{1:11.8,2:10.2,3:15.3,4:15.0,5:16.6,6:12.7,7:16.0,8:28.1,9:20.9,10:22.2,11:21.0,12:14.2} },
   { id:'tomato',    name:'番茄-牛番茄',  family:'solanaceae',  cycle:100, ph:[6.0,6.8], soils:['sandy','loam'], env:['net','both'],         irr:['drip'],                      exp:['mid','expert'],            diff:3, notes:'需網室＋滴灌，連作間隔 3 個月', typhoon:[7,8,9], cold:[1,2], yieldPerTan:600, price:{1:47.4,2:30.3,3:27.4,4:24.4,5:38.6,6:35.0,7:64.5,8:76.9,9:108.9,10:93.4,11:94.1,12:75.2} },
-  { id:'cucumber',  name:'花胡瓜',       family:'cucurbit',    cycle:55,  ph:[5.5,6.8], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'怕積水，可多批種植',    typhoon:[7,8,9], cold:[1,2],   yieldPerTan:700,  price:{1:46.4,2:44.9,3:41.5,4:32.1,5:34.0,6:40.2,7:56.5,8:78.5,9:45.5,10:64.8,11:67.2,12:49.8} },
-  { id:'carrot',    name:'胡蘿蔔-清洗',  family:'apiaceae',    cycle:110, ph:[6.0,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:2, notes:'需深耕 30cm，冬季高價', typhoon:[7,8],   cold:[],      yieldPerTan:900,  price:{1:15.0,2:12.7,3:12.1,4:12.7,5:14.0,6:16.0,7:17.8,8:21.0,9:23.8,10:27.0,11:31.0,12:24.6} },
+  { id:'cucumber',  name:'花胡瓜',       family:'cucurbit',    cycle:45,  ph:[5.5,6.8], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'怕積水，可多批種植',    typhoon:[7,8,9], cold:[1,2],   yieldPerTan:700,  price:{1:46.4,2:44.9,3:41.5,4:32.1,5:34.0,6:40.2,7:56.5,8:78.5,9:45.5,10:64.8,11:67.2,12:49.8} },
+  { id:'carrot',    name:'胡蘿蔔-清洗',  family:'apiaceae',    cycle:80,  ph:[6.0,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:2, notes:'需深耕 30cm，冬季高價', typhoon:[7,8],   cold:[],      yieldPerTan:900,  price:{1:15.0,2:12.7,3:12.1,4:12.7,5:14.0,6:16.0,7:17.8,8:21.0,9:23.8,10:27.0,11:31.0,12:24.6} },
   { id:'loofah',    name:'絲瓜',         family:'cucurbit',    cycle:65,  ph:[5.5,6.8], soils:['sandy','loam','clay'], env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'搭棚架，耐熱',      typhoon:[7,8,9], cold:[1,2],   yieldPerTan:600,  price:{1:40.2,2:34.8,3:38.7,4:30.9,5:25.2,6:24.1,7:31.6,8:51.4,9:31.8,10:39.1,11:45.9,12:37.8} },
-  { id:'bokchoy',   name:'小白菜-蚵仔白',family:'brassica',    cycle:35,  ph:[6.0,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['sprinkler','manual'],        exp:['beginner','mid','expert'], diff:1, notes:'35天快速輪作，波動大', typhoon:[7,8,9], cold:[],      yieldPerTan:400,  price:{1:18.2,2:16.2,3:20.1,4:16.1,5:21.8,6:22.4,7:39.7,8:50.8,9:29.4,10:50.6,11:28.0,12:20.6} },
+  { id:'bokchoy',   name:'小白菜-蚵仔白',family:'brassica',    cycle:25,  ph:[6.0,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['sprinkler','manual'],        exp:['beginner','mid','expert'], diff:1, notes:'25天快速輪作，波動大', typhoon:[7,8,9], cold:[],      yieldPerTan:400,  price:{1:18.2,2:16.2,3:20.1,4:16.1,5:21.8,6:22.4,7:39.7,8:50.8,9:29.4,10:50.6,11:28.0,12:20.6} },
   { id:'corn',      name:'玉米-甜軟殼',  family:'grass',       cycle:80,  ph:[5.8,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'需密植授粉，耐連作',   typhoon:[7,8,9], cold:[],      yieldPerTan:300,  price:{1:28.3,2:22.9,3:23.1,4:18.3,5:19.9,6:17.1,7:29.4,8:43.1,9:34.6,10:30.7,11:44.2,12:35.2} },
-  { id:'bm_white',  name:'苦瓜-白大米',  family:'cucurbit',    cycle:55,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'耐熱，需棚架，颱風前高價', typhoon:[7,8,9], cold:[1,2], yieldPerTan:500, price:{1:69.2,2:82.6,3:75.3,4:49.1,5:40.5,6:28.9,7:38.5,8:83.4,9:70.1,10:73.5,11:70.6,12:66.6} },
-  { id:'bm_green',  name:'苦瓜-翠綠',    family:'cucurbit',    cycle:50,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['mid','expert'],            diff:2, notes:'冬季均價最強（2月93元）', typhoon:[7,8,9], cold:[1,2], yieldPerTan:450, price:{1:77.5,2:92.8,3:77.0,4:46.0,5:27.1,6:23.1,7:46.5,8:84.3,9:51.7,10:51.1,11:51.8,12:60.2} },
-  { id:'bm_mtn',    name:'苦瓜-山苦瓜',  family:'cucurbit',    cycle:65,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:3, notes:'均價最高，3月達122元', typhoon:[7,8,9], cold:[1,2],  yieldPerTan:300, price:{1:95.4,2:109.7,3:122.6,4:82.0,5:64.7,6:46.4,7:47.1,8:79.8,9:84.7,10:95.6,11:94.3,12:87.6} },
+  { id:'bm_white',  name:'苦瓜-白大米',  family:'cucurbit',    cycle:120, ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'耐熱需棚架，定植到初收約120天，之後可持續採收', typhoon:[7,8,9], cold:[1,2], yieldPerTan:500, price:{1:69.2,2:82.6,3:75.3,4:49.1,5:40.5,6:28.9,7:38.5,8:83.4,9:70.1,10:73.5,11:70.6,12:66.6} },
+  { id:'bm_green',  name:'苦瓜-翠綠',    family:'cucurbit',    cycle:110, ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['mid','expert'],            diff:2, notes:'冬季均價最強（2月93元），110天到初收', typhoon:[7,8,9], cold:[1,2], yieldPerTan:450, price:{1:77.5,2:92.8,3:77.0,4:46.0,5:27.1,6:23.1,7:46.5,8:84.3,9:51.7,10:51.1,11:51.8,12:60.2} },
+  { id:'bm_mtn',    name:'苦瓜-山苦瓜',  family:'cucurbit',    cycle:130, ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:3, notes:'均價最高，3月達122元，130天到初收', typhoon:[7,8,9], cold:[1,2],  yieldPerTan:300, price:{1:95.4,2:109.7,3:122.6,4:82.0,5:64.7,6:46.4,7:47.1,8:79.8,9:84.7,10:95.6,11:94.3,12:87.6} },
 ];
 
 const WIN_RATE = {
@@ -236,6 +236,75 @@ const WIN_RATE = {
   '苦瓜-白大米':  {win:67,avoid:44}, '苦瓜-翠綠':    {win:77,avoid:52},
   '苦瓜-山苦瓜':  {win:59,avoid:46},
 };
+
+// ── 台灣各地月均溫（°C）資料來源：中央氣象署 1991-2020 平均 ──
+const REGIONAL_TEMPS = {
+  north:   [15,16,18,22,26,29,31,31,28,24,20,16], // 台北
+  central: [16,17,20,24,27,29,30,30,28,24,21,17], // 台中
+  south:   [18,19,22,26,29,30,31,31,29,26,23,19], // 台南
+  east:    [17,18,21,24,27,29,30,30,27,23,20,17], // 花蓮
+};
+
+// 各科作物溫度需求
+const FAMILY_TEMPS = {
+  brassica:   { base:4.4, opt:[15,20], max:28 }, // 十字花科（高麗菜、蘿蔔）
+  solanaceae: { base:10,  opt:[20,27], max:35 }, // 茄科（番茄）
+  cucurbit:   { base:10,  opt:[23,30], max:38 }, // 葫蘆科（苦瓜、絲瓜、胡瓜）
+  grass:      { base:10,  opt:[24,30], max:36 }, // 禾本科（玉米）
+  apiaceae:   { base:4.4, opt:[15,22], max:28 }, // 繖形科（胡蘿蔔）
+};
+
+/**
+ * 動態週期計算：依地區溫度、土壤 pH、灌溉調整種植天數
+ * 回傳 { days, factor, avgTemp, reason[] }
+ */
+function adjustedCycle(crop, plantMonth, region, plot) {
+  const ft   = FAMILY_TEMPS[crop.family] || FAMILY_TEMPS.brassica;
+  const temps = REGIONAL_TEMPS[region]  || REGIONAL_TEMPS.central;
+
+  // 取種植月 + 生長中期的平均溫度
+  const midIdx   = (plantMonth - 1 + Math.round(crop.cycle / 60)) % 12;
+  const avgTemp  = (temps[(plantMonth - 1) % 12] + temps[midIdx]) / 2;
+
+  let factor = 1.0;
+  const reasons = [];
+
+  // ① 溫度修正
+  if (avgTemp < ft.base) {
+    factor = 2.5; reasons.push(`均溫 ${Math.round(avgTemp)}°C 低於基礎溫 ${ft.base}°C，生長極緩`);
+  } else if (avgTemp < ft.opt[0]) {
+    const ratio = (ft.opt[0] - avgTemp) / (ft.opt[0] - ft.base);
+    factor += ratio * 0.6;
+    reasons.push(`均溫 ${Math.round(avgTemp)}°C 偏冷（最適 ${ft.opt[0]}-${ft.opt[1]}°C），延長 ${Math.round(ratio*60)} 天`);
+  } else if (avgTemp > ft.max) {
+    factor = 1.25; reasons.push(`均溫 ${Math.round(avgTemp)}°C 超過耐熱上限 ${ft.max}°C，高溫逆境`);
+  } else if (avgTemp > ft.opt[1]) {
+    const ratio = (avgTemp - ft.opt[1]) / (ft.max - ft.opt[1]);
+    factor -= ratio * 0.1;
+    reasons.push(`均溫 ${Math.round(avgTemp)}°C 偏熱，略縮短 ${Math.round(ratio*0.1*crop.cycle)} 天`);
+  } else {
+    reasons.push(`均溫 ${Math.round(avgTemp)}°C 在最適範圍內`);
+  }
+
+  // ② pH 修正
+  const ph = parseFloat(plot.ph);
+  const [phLo, phHi] = crop.ph;
+  if (ph < phLo - 0.5 || ph > phHi + 0.5) {
+    factor *= 1.15; reasons.push(`pH ${ph} 明顯偏離適範 ${phLo}-${phHi}，養分吸收受阻 +15%`);
+  } else if (ph < phLo || ph > phHi) {
+    factor *= 1.07; reasons.push(`pH ${ph} 略超適範 ${phLo}-${phHi}，+7%`);
+  }
+
+  // ③ 灌溉修正
+  if (plot.irrigation === 'manual') {
+    factor *= 1.08; reasons.push('人工澆水不穩定 +8%');
+  } else if (plot.irrigation === 'drip') {
+    factor *= 0.97; reasons.push('滴灌精準供水 -3%');
+  }
+
+  const days = Math.round(crop.cycle * factor);
+  return { days, factor: Math.round(factor * 100) / 100, avgTemp: Math.round(avgTemp), reasons };
+}
 
 // 成本預設（元/分地/輪）
 const DEFAULT_COSTS = {
@@ -331,7 +400,7 @@ function scoreCrop(crop, cond, plot) {
 
 // ── 排程算法 ─────────────────────────────────────────────────
 function schedulePlot(plot, cond) {
-  // 將 12 個月拆成種植槽，從 startMonth 開始，每輪結束後接下一輪
+  const plotWithIrr = { ...plot, irrigation: cond.irrigation };
   const avgPrices = {};
   CROPS.forEach(c => {
     avgPrices[c.id] = Object.values(c.price).reduce((a,b)=>a+b,0)/12;
@@ -340,41 +409,39 @@ function schedulePlot(plot, cond) {
   const assignments = [];
   let currentMonth = parseInt(cond.startMonth);
   let lastFamily = null;
-  const maxRounds = 6; // 最多排 6 輪（避免無限迴圈）
+  const maxRounds = 6;
 
-  for(let round=0; round<maxRounds; round++){
-    // 候選作物：符合條件，且不與上一輪同科
+  for (let round = 0; round < maxRounds; round++) {
     const candidates = CROPS
-      .filter(c => !(c.family===lastFamily && lastFamily!=='' && lastFamily!=='grass'))
+      .filter(c => !(c.family === lastFamily && lastFamily !== '' && lastFamily !== 'grass'))
       .map(c => {
-        const harvestMonth = ((currentMonth-1+Math.round(c.cycle/30))%12)+1;
+        // 動態週期：依溫度/pH/灌溉調整
+        const cycleInfo = adjustedCycle(c, currentMonth, cond.region, plotWithIrr);
+        const harvestMonth = ((currentMonth - 1 + Math.round(cycleInfo.days / 30)) % 12) + 1;
         const price = c.price[harvestMonth];
-        const priceRatio = price/avgPrices[c.id];
+        const priceRatio = price / avgPrices[c.id];
         const score = scoreCrop(c, cond, plot);
-        return {crop:c, harvestMonth, price, priceRatio, score, combined: score*0.5 + priceRatio*50};
+        return { crop: c, cycleInfo, harvestMonth, price, priceRatio, score,
+                 combined: score * 0.5 + priceRatio * 50 };
       })
-      .sort((a,b)=>b.combined-a.combined);
+      .sort((a, b) => b.combined - a.combined);
 
-    if(!candidates.length) break;
+    if (!candidates.length) break;
     const chosen = candidates[0];
     assignments.push({
-      crop: chosen.crop,
+      crop:       chosen.crop,
+      cycleInfo:  chosen.cycleInfo,
       plantMonth: currentMonth,
       harvestMonth: chosen.harvestMonth,
-      price: chosen.price,
+      price:      chosen.price,
       priceRatio: chosen.priceRatio,
     });
     lastFamily = chosen.crop.family;
+    currentMonth = (chosen.harvestMonth % 12) + 1;
 
-    // 下一輪種植月 = 本輪收成月 + 1（休耕一個月）
-    currentMonth = (chosen.harvestMonth%12)+1;
-
-    // 如果已繞完一整年，停止
-    const totalMonthsCovered = assignments.reduce((s,a)=>{
-      const m = Math.round(a.crop.cycle/30)+1;
-      return s+m;
-    },0);
-    if(totalMonthsCovered>=12) break;
+    const totalMonths = assignments.reduce((s, a) =>
+      s + Math.round(a.cycleInfo.days / 30) + 1, 0);
+    if (totalMonths >= 12) break;
   }
   return assignments;
 }
@@ -383,6 +450,7 @@ function schedulePlot(plot, cond) {
 function runPlanner() {
   if(plots.length===0){ alert('請先新增至少一塊地塊！'); return; }
   const cond = {
+    region: document.getElementById('region').value,
     env: document.getElementById('env').value,
     irrigation: document.getElementById('irrigation').value,
     exp: document.getElementById('exp').value,
@@ -431,14 +499,14 @@ function renderGantt(schedules) {
     const monthData = {};
     for(let m=1;m<=12;m++) monthData[m]={type:'empty',color:null,extra:[]};
 
-    assignments.forEach(({crop, plantMonth, harvestMonth, price})=>{
+    assignments.forEach(({crop, cycleInfo, plantMonth, harvestMonth, price})=>{
       const col = cropColorMap[crop.id];
       const avg = Object.values(crop.price).reduce((a,b)=>a+b,0)/12;
       const hClass = price>avg*1.2 ? 'h-hi' : price>avg*0.85 ? 'h-med' : 'h-lo';
 
-      // 填充月份
+      // 填充月份（用實際調整後的週期）
       let m = plantMonth;
-      let monthsLeft = Math.round(crop.cycle/30)+1;
+      let monthsLeft = Math.round(cycleInfo.days/30)+1;
       for(let i=0;i<monthsLeft;i++){
         const cur = ((m-1+i)%12)+1;
         if(cur===plantMonth) monthData[cur]={type:'plant',color:col,extra:[]};
@@ -454,7 +522,11 @@ function renderGantt(schedules) {
     // 圖例行（本地塊用到的作物）
     const legendItems = assignments.map(a=>{
       const col=cropColorMap[a.crop.id];
-      return `<div class="cc-item"><div class="cc-dot" style="background:${col}0.7)"></div>${a.crop.name}</div>`;
+      const adj = a.cycleInfo.factor !== 1.0
+        ? `<span style="color:${a.cycleInfo.factor>1?'var(--yellow)':'var(--green)'}">${a.cycleInfo.days}天</span>`
+        : `${a.cycleInfo.days}天`;
+      const tip = a.cycleInfo.reasons.join(' | ');
+      return `<div class="cc-item" title="${tip}"><div class="cc-dot" style="background:${col}0.7)"></div>${a.crop.name}（${adj}，均溫${a.cycleInfo.avgTemp}°C）</div>`;
     });
     const legendRow = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:11px">${legendItems.join('')}</div>`;
 
@@ -483,25 +555,31 @@ function renderNetTable(schedules) {
   const rows = [];
   let totalRevenue=0, totalCost=0;
 
+  const MNAMES=['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   schedules.forEach(({plot, assignments})=>{
-    assignments.forEach(({crop, plantMonth, harvestMonth, price})=>{
+    assignments.forEach(({crop, cycleInfo, plantMonth, harvestMonth, price})=>{
       const co = cropCosts[crop.id];
       const costPerTan = co.seed+co.fert+co.pest+co.labor;
-      const grossPerTan = crop.yieldPerTan * price * 0.6 / 1000; // 千元
-      const netPerTan = grossPerTan - costPerTan/1000;
+      const grossPerTan = crop.yieldPerTan * price * 0.6 / 1000;
       const gross = grossPerTan * plot.area;
       const cost  = costPerTan * plot.area / 1000;
       const net   = gross - cost;
       totalRevenue += gross;
       totalCost    += cost;
 
-      const MNAMES=['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
       const netClass = net>0?'hi':net>-5?'med':'lo';
-      const wr=WIN_RATE[crop.name];
+      const wr = WIN_RATE[crop.name];
+      // 週期顯示：若有調整則顯示原始→調整
+      const cycleDisplay = cycleInfo.factor !== 1.0
+        ? `<span style="color:${cycleInfo.factor>1?'var(--yellow)':'var(--green)'}"
+             title="${cycleInfo.reasons.join('\n')}">${cycleInfo.days}天</span>
+           <span style="color:var(--muted);font-size:10px">（基礎${crop.cycle}天，×${cycleInfo.factor}）</span>`
+        : `${cycleInfo.days}天`;
       rows.push(`<tr>
         <td>${plot.name}</td>
         <td>${crop.name}</td>
         <td>${MNAMES[plantMonth]} → ${MNAMES[harvestMonth]}</td>
+        <td>${cycleDisplay}</td>
         <td class="num">${price.toFixed(0)} 元/kg</td>
         <td class="num">${(crop.yieldPerTan*plot.area).toLocaleString()} kg</td>
         <td class="num">${gross.toFixed(1)} 千</td>
@@ -515,12 +593,12 @@ function renderNetTable(schedules) {
   const totalNet = totalRevenue - totalCost;
   document.getElementById('netTable').innerHTML = `
     <thead><tr>
-      <th>地塊</th><th>作物</th><th>種 → 收</th><th>均價</th><th>總產量</th>
+      <th>地塊</th><th>作物</th><th>種 → 收</th><th>實際週期</th><th>均價</th><th>總產量</th>
       <th class="num">毛收入</th><th class="num">成本</th><th class="num">淨利</th><th class="num">模型勝率</th>
     </tr></thead>
     <tbody>${rows.join('')}</tbody>
     <tfoot><tr>
-      <td colspan="5">全年合計</td>
+      <td colspan="6">全年合計</td>
       <td class="num">${totalRevenue.toFixed(1)} 千</td>
       <td class="num lo">${totalCost.toFixed(1)} 千</td>
       <td class="num ${totalNet>0?'hi':'lo'}">${totalNet.toFixed(1)} 千元</td>
