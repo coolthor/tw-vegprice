@@ -658,8 +658,9 @@ function renderTopCards(crops) {
   container.innerHTML = crops.map((c, i) => {
     const cls = changeClass(c.changePct);
     const isActive = state.selectedCrop === c.name ? ' active' : '';
+    const safeName = encodeURIComponent(c.name);
     return `
-    <div class="top-card${isActive}" onclick="selectCrop('${c.name.replace(/'/g,'\\'')}')">
+    <div class="top-card${isActive}" onclick="selectCrop(decodeURIComponent('${safeName}'))">
       <div class="card-rank">#${i+1} 交易量排行</div>
       <div class="card-name" title="${c.name}">${c.name}</div>
       <div>
@@ -681,7 +682,7 @@ function renderTable(crops) {
   tbody.innerHTML = crops.map((c, i) => {
     const cls = changeClass(c.changePct);
     return `
-    <tr onclick="selectCrop('${c.name.replace(/'/g,'\\'')}')">
+    <tr onclick="selectCrop(decodeURIComponent('${encodeURIComponent(c.name)}'))">
       <td style="color:var(--muted);font-size:0.8rem">${i+1}</td>
       <td class="name-cell">${c.name}</td>
       <td class="price-cell">${c.avg.toFixed(1)}</td>
