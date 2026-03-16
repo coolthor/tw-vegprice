@@ -5,687 +5,533 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>種植排程規劃 — 台灣蔬菜價格</title>
 <style>
-  :root {
-    --bg: #0f1117; --surface: #1a1d2e; --surface2: #252840;
-    --border: #2e3250; --text: #e2e8f0; --muted: #8892a4;
-    --green: #4ade80; --yellow: #fbbf24; --red: #f87171;
-    --blue: #60a5fa; --purple: #a78bfa; --cyan: #22d3ee;
-    --orange: #fb923c;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'SF Pro Text', system-ui, sans-serif; min-height: 100vh; }
+:root {
+  --bg:#0f1117; --surface:#1a1d2e; --surface2:#252840;
+  --border:#2e3250; --text:#e2e8f0; --muted:#8892a4;
+  --green:#4ade80; --yellow:#fbbf24; --red:#f87171;
+  --blue:#60a5fa; --purple:#a78bfa; --cyan:#22d3ee; --orange:#fb923c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'SF Pro Text',system-ui,sans-serif;min-height:100vh}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px}
+nav a{color:var(--muted);text-decoration:none;font-size:14px}
+nav a:hover{color:var(--text)}
+nav .title{color:var(--text);font-weight:600;font-size:16px}
+.container{max-width:1140px;margin:0 auto;padding:32px 20px}
+h1{font-size:22px;font-weight:700;margin-bottom:6px}
+.subtitle{color:var(--muted);font-size:14px;margin-bottom:28px}
 
-  /* ── Nav ── */
-  nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-  nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
-  nav a:hover { color: var(--text); }
-  nav .title { color: var(--text); font-weight: 600; font-size: 16px; }
-  nav .sep { color: var(--border); }
+/* ── Panels ── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px}
+.panel-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+select,input[type=range],input[type=number],input[type=text]{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);padding:8px 11px;font-size:13px;outline:none}
+select:focus,input:focus{border-color:var(--purple)}
+.ph-val{font-size:17px;font-weight:700;color:var(--cyan)}
 
-  /* ── Layout ── */
-  .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+/* ── Plots ── */
+.plots-list{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.plot-row{display:grid;grid-template-columns:1fr 80px 120px 110px 100px auto;gap:10px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px}
+.plot-row input,.plot-row select{background:var(--bg);font-size:12px}
+.plot-row label{font-size:10px;margin-bottom:3px}
+.btn-del{background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);color:var(--red);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+.btn-del:hover{background:rgba(248,113,113,.25)}
+.btn-add{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);color:var(--green);border-radius:7px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-add:hover{background:rgba(74,222,128,.2)}
 
-  /* ── Form ── */
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 32px; }
-  .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-  .form-group select, .form-group input[type=range], .form-group input[type=number] {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); padding: 8px 12px; font-size: 14px; outline: none;
-  }
-  .form-group select:focus, .form-group input:focus { border-color: var(--purple); }
-  .ph-display { font-size: 18px; font-weight: 700; color: var(--cyan); margin-top: 4px; }
-  .btn { background: var(--purple); color: #fff; border: none; border-radius: 8px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity .15s; }
-  .btn:hover { opacity: .85; }
-  .form-footer { grid-column: 1/-1; margin-top: 8px; }
+/* ── Costs toggle ── */
+.costs-toggle{background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:6px 14px;font-size:12px;cursor:pointer}
+.costs-toggle:hover{border-color:var(--purple);color:var(--text)}
+.costs-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:14px}
+.costs-table th{text-align:left;padding:6px 10px;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.costs-table td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.costs-table td:last-child{border-bottom:none}
+.costs-table input{width:80px;text-align:right;font-size:12px;padding:4px 7px}
 
-  /* ── Section heading ── */
-  .section-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--purple); border-radius: 2px; }
+/* ── Run button ── */
+.btn-run{background:var(--purple);color:#fff;border:none;border-radius:9px;padding:13px 0;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s;margin-top:6px}
+.btn-run:hover{opacity:.85}
 
-  /* ── Crop cards ── */
-  .crops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 40px; }
-  .crop-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; overflow: hidden; }
-  .crop-card.top { border-color: var(--purple); }
-  .crop-card .badge { position: absolute; top: 12px; right: 12px; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
-  .badge-best { background: rgba(167,139,250,.2); color: var(--purple); }
-  .badge-good { background: rgba(74,222,128,.15); color: var(--green); }
-  .badge-ok   { background: rgba(251,191,36,.12); color: var(--yellow); }
-  .crop-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .crop-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--surface2); color: var(--muted); }
-  .tag.match { background: rgba(34,211,238,.1); color: var(--cyan); }
-  .crop-score-bar { height: 4px; background: var(--surface2); border-radius: 2px; margin-bottom: 10px; }
-  .crop-score-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--purple), var(--cyan)); transition: width .6s ease; }
-  .crop-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-  .stat { text-align: center; }
-  .stat .val { font-size: 14px; font-weight: 700; }
-  .stat .lbl { font-size: 10px; color: var(--muted); }
-  .best-plant { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
-  .best-plant span { color: var(--green); font-weight: 600; }
-  .warn { color: var(--yellow); }
+/* ── Section heading ── */
+.sec{font-size:16px;font-weight:700;margin:32px 0 14px;display:flex;align-items:center;gap:8px}
+.sec::before{content:'';display:block;width:4px;height:18px;background:var(--purple);border-radius:2px}
 
-  /* ── Calendar ── */
-  .calendar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 40px; overflow-x: auto; }
-  .cal-grid { min-width: 700px; }
-  .cal-header { display: grid; grid-template-columns: 140px repeat(12, 1fr); gap: 2px; margin-bottom: 6px; }
-  .cal-header .month-lbl { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; padding: 4px 0; }
-  .cal-row { display: grid; grid-template-columns: 140px repeat(12, 1fr); gap: 2px; margin-bottom: 3px; align-items: center; }
-  .cal-crop-name { font-size: 12px; color: var(--text); padding-right: 8px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cal-cell { height: 22px; border-radius: 3px; background: var(--surface2); position: relative; cursor: default; }
-  .cal-cell.plant   { background: rgba(167,139,250,.35); }
-  .cal-cell.grow    { background: rgba(34,211,238,.2); }
-  .cal-cell.harvest-hi  { background: rgba(74,222,128,.55); }
-  .cal-cell.harvest-med { background: rgba(251,191,36,.4); }
-  .cal-cell.harvest-lo  { background: rgba(248,113,113,.35); }
-  .cal-cell.risk-typhoon { outline: 2px solid rgba(251,191,36,.5); }
-  .cal-cell.risk-cold    { outline: 2px solid rgba(96,165,250,.5); }
-  .cal-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 11px; color: var(--muted); }
-  .leg { display: flex; align-items: center; gap: 5px; }
-  .leg-dot { width: 12px; height: 12px; border-radius: 2px; }
+/* ── Gantt ── */
+.gantt-wrap{overflow-x:auto}
+.gantt{min-width:750px}
+.gantt-header{display:grid;grid-template-columns:160px repeat(12,1fr);gap:2px;margin-bottom:4px}
+.gantt-header .mh{text-align:center;font-size:10px;color:var(--muted);font-weight:600;padding:3px 0}
+.gantt-plot-label{font-size:11px;font-weight:700;color:var(--purple);padding:8px 0 4px;grid-column:1/-1}
+.gantt-row{display:grid;grid-template-columns:160px repeat(12,1fr);gap:2px;margin-bottom:2px;align-items:center}
+.g-name{font-size:11px;color:var(--text);text-align:right;padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-cell{height:20px;border-radius:3px;background:var(--surface2);position:relative;overflow:hidden}
+/* crop color bands */
+.g-cell.plant{background:rgba(167,139,250,.4)}
+.g-cell.grow{background:rgba(34,211,238,.18)}
+.g-cell.h-hi{background:rgba(74,222,128,.6)}
+.g-cell.h-med{background:rgba(251,191,36,.45)}
+.g-cell.h-lo{background:rgba(248,113,113,.4)}
+.g-cell.typhoon{outline:2px solid rgba(251,191,36,.55);outline-offset:-2px}
+.g-cell.cold{outline:2px solid rgba(96,165,250,.55);outline-offset:-2px}
+.gantt-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--muted)}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0}
 
-  /* ── Revenue table ── */
-  .rev-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .rev-table th { text-align: left; padding: 8px 12px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--border); }
-  .rev-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  .rev-table tr:last-child td { border-bottom: none; }
-  .rev-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-  .hi { color: var(--green); font-weight: 700; }
-  .med { color: var(--yellow); }
-  .lo { color: var(--red); }
+/* ── Rotation warnings ── */
+.rotation-warn{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--yellow);margin-bottom:16px}
+.rotation-warn b{display:block;margin-bottom:4px}
 
-  /* ── Empty state ── */
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty .icon { font-size: 40px; margin-bottom: 12px; }
+/* ── Net profit table ── */
+.net-table{width:100%;border-collapse:collapse;font-size:13px}
+.net-table th{text-align:left;padding:8px 12px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
+.net-table td{padding:9px 12px;border-bottom:1px solid var(--border)}
+.net-table .num{text-align:right;font-variant-numeric:tabular-nums}
+.net-table tfoot td{font-weight:700;border-top:2px solid var(--border);border-bottom:none;font-size:14px}
+.hi{color:var(--green);font-weight:700}
+.med{color:var(--yellow)}
+.lo{color:var(--red)}
+.note{color:var(--muted);font-size:11px;margin-top:10px}
 
-  /* ── Tooltip ── */
-  [data-tip] { position: relative; }
-  [data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #2e3250; color: var(--text); font-size: 11px; padding: 4px 8px; border-radius: 4px; white-space: nowrap; z-index: 10; pointer-events: none; }
+/* ── Crop color legend ── */
+.crop-colors{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.cc-item{display:flex;align-items:center;gap:5px;font-size:11px}
+.cc-dot{width:12px;height:12px;border-radius:3px}
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html">← 今日行情</a>
-  <span class="sep">|</span>
+  <span style="color:var(--border)">|</span>
   <span class="title">種植排程規劃</span>
 </nav>
 
 <div class="container">
   <h1>耕作計畫排程</h1>
-  <p class="subtitle">輸入您的農地條件，系統將根據 2023–2025 年真實價格資料，推薦適合種植的作物與最佳時程。</p>
+  <p class="subtitle">輸入農地條件與成本，系統自動安排全年輪作計畫，避免連作並估算淨利。</p>
 
-  <!-- ── 條件表單 ── -->
-  <div class="form-grid">
-    <div class="form-group">
-      <label>地區</label>
-      <select id="region">
-        <option value="north">北部（台北/桃園/新竹）</option>
-        <option value="central" selected>中部（台中/彰化/雲林）</option>
-        <option value="south">南部（嘉義/台南/高雄）</option>
-        <option value="east">東部（宜蘭/花蓮/台東）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>種植環境</label>
-      <select id="env">
-        <option value="open">露天</option>
-        <option value="net" selected>網室</option>
-        <option value="both">露天 + 網室</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>土壤類型</label>
-      <select id="soil">
-        <option value="sandy">砂質土（排水快）</option>
-        <option value="loam" selected>壤土（最佳）</option>
-        <option value="clay">黏土（排水差）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>灌溉設備</label>
-      <select id="irrigation">
-        <option value="drip" selected>滴灌</option>
-        <option value="sprinkler">噴灌</option>
-        <option value="manual">人工澆水</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>土壤 pH　<span class="ph-display" id="phVal">6.5</span></label>
-      <input type="range" id="ph" min="4.5" max="7.5" step="0.1" value="6.5"
-             oninput="document.getElementById('phVal').textContent=this.value">
-    </div>
-    <div class="form-group">
-      <label>農地面積（分）</label>
-      <input type="number" id="area" value="5" min="1" max="100">
-    </div>
-    <div class="form-group">
-      <label>種植經驗</label>
-      <select id="exp">
-        <option value="beginner">新手（1年以下）</option>
-        <option value="mid" selected>中等（1–5年）</option>
-        <option value="expert">老農（5年以上）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>開始月份</label>
-      <select id="startMonth">
-        <option value="1">1月</option><option value="2">2月</option>
-        <option value="3" selected>3月</option><option value="4">4月</option>
-        <option value="5">5月</option><option value="6">6月</option>
-        <option value="7">7月</option><option value="8">8月</option>
-        <option value="9">9月</option><option value="10">10月</option>
-        <option value="11">11月</option><option value="12">12月</option>
-      </select>
-    </div>
-    <div class="form-footer">
-      <button class="btn" onclick="runPlanner()">產生種植計畫</button>
+  <!-- ── 全局條件 ── -->
+  <div class="panel">
+    <div class="panel-title">全局條件</div>
+    <div class="form-grid">
+      <div>
+        <label>地區</label>
+        <select id="region">
+          <option value="north">北部</option>
+          <option value="central" selected>中部（彰化/雲林）</option>
+          <option value="south">南部</option>
+          <option value="east">東部</option>
+        </select>
+      </div>
+      <div>
+        <label>種植環境</label>
+        <select id="env">
+          <option value="open">露天</option>
+          <option value="net" selected>網室</option>
+          <option value="both">兩者皆有</option>
+        </select>
+      </div>
+      <div>
+        <label>灌溉設備</label>
+        <select id="irrigation">
+          <option value="drip" selected>滴灌</option>
+          <option value="sprinkler">噴灌</option>
+          <option value="manual">人工</option>
+        </select>
+      </div>
+      <div>
+        <label>種植經驗</label>
+        <select id="exp">
+          <option value="beginner">新手</option>
+          <option value="mid" selected>中等</option>
+          <option value="expert">老農</option>
+        </select>
+      </div>
+      <div>
+        <label>計畫起始月</label>
+        <select id="startMonth">
+          <option>1</option><option>2</option><option value="3" selected>3</option>
+          <option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option>
+          <option>10</option><option>11</option><option>12</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <!-- ── 結果區 ── -->
+  <!-- ── 地塊管理 ── -->
+  <div class="panel">
+    <div class="panel-title">
+      地塊管理
+      <button class="btn-add" onclick="addPlot()">＋ 新增地塊</button>
+    </div>
+    <div class="plots-list" id="plotsList"></div>
+    <div style="font-size:11px;color:var(--muted)">每塊地可設定不同的土壤條件；輪作規則在同一地塊內生效。</div>
+  </div>
+
+  <!-- ── 成本設定 ── -->
+  <div class="panel">
+    <div class="panel-title">
+      成本設定（元 / 分地 / 輪）
+      <button class="costs-toggle" onclick="toggleCosts()">展開調整 ▾</button>
+    </div>
+    <div id="costsPanel" style="display:none">
+      <table class="costs-table" id="costsTable"></table>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">預設值參考台灣農業成本調查，可自行調整。1分地 ≈ 100 坪 ≈ 330 m²</div>
+  </div>
+
+  <button class="btn-run" onclick="runPlanner()">產生全年種植計畫</button>
+
+  <!-- ── 結果 ── -->
   <div id="results" style="display:none">
-
-    <div class="section-title">推薦作物（依綜合評分排序）</div>
-    <div class="crops-grid" id="cropCards"></div>
-
-    <div class="section-title">12 個月種植甘特圖</div>
-    <div class="calendar-wrap">
-      <div class="cal-grid" id="gantt"></div>
-      <div class="cal-legend">
-        <div class="leg"><div class="leg-dot" style="background:rgba(167,139,250,.5)"></div>種植期</div>
-        <div class="leg"><div class="leg-dot" style="background:rgba(34,211,238,.3)"></div>生長期</div>
-        <div class="leg"><div class="leg-dot" style="background:rgba(74,222,128,.6)"></div>收成（高價）</div>
-        <div class="leg"><div class="leg-dot" style="background:rgba(251,191,36,.5)"></div>收成（中價）</div>
-        <div class="leg"><div class="leg-dot" style="background:rgba(248,113,113,.45)"></div>收成（低價）</div>
-        <div class="leg"><div class="leg-dot" style="outline:2px solid rgba(251,191,36,.8); background:transparent"></div>颱風風險</div>
-        <div class="leg"><div class="leg-dot" style="outline:2px solid rgba(96,165,250,.8); background:transparent"></div>低溫風險</div>
+    <div class="sec">全年輪作甘特圖</div>
+    <div id="rotationWarns"></div>
+    <div class="panel gantt-wrap"><div id="gantt"></div>
+      <div class="gantt-legend">
+        <div class="leg"><div class="leg-dot" style="background:rgba(167,139,250,.5)"></div>種植</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(34,211,238,.25)"></div>生長</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(74,222,128,.65)"></div>收成（高價）</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(251,191,36,.55)"></div>收成（中價）</div>
+        <div class="leg"><div class="leg-dot" style="background:rgba(248,113,113,.5)"></div>收成（低價）</div>
+        <div class="leg"><div class="leg-dot" style="outline:2px solid rgba(251,191,36,.7);background:transparent"></div>颱風季</div>
+        <div class="leg"><div class="leg-dot" style="outline:2px solid rgba(96,165,250,.7);background:transparent"></div>低溫</div>
       </div>
     </div>
 
-    <div class="section-title">預估年收益（粗估，僅供參考）</div>
-    <div class="calendar-wrap">
-      <table class="rev-table" id="revTable"></table>
-    </div>
-
-  </div>
-
-  <div id="emptyState">
-    <div class="empty">
-      <div class="icon">🌱</div>
-      <div>填入農地條件，點擊「產生種植計畫」</div>
+    <div class="sec">預估淨利明細</div>
+    <div class="panel">
+      <table class="net-table" id="netTable"></table>
+      <p class="note">※ 毛收入 = 產量 × 均價 × 良率 60%。淨利 = 毛收入 − 種苗 − 肥料 − 農藥 − 人工。未含折舊、土地租金。</p>
     </div>
   </div>
 </div>
 
 <script>
-// ── 作物知識庫 ─────────────────────────────────────────────
+// ── 作物知識庫 ────────────────────────────────────────────────
 const CROPS = [
-  {
-    id: 'cabbage_fall', name: '甘藍-初秋', family: 'brassica', cycle: 80,
-    ph: [5.5, 7.0], soils: ['loam','clay'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'],
-    difficulty: 1,
-    notes: '耐寒，秋冬種植最佳，連作易有根腫病',
-    rotationBlock: ['brassica'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2,12],
-    // 最佳收成月（價格高峰）
-    peakHarvestMonths: [8,9,10],
-    // 種植建議月（可種）：考慮 cycle 天數後收成的好月份
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 6, harvestMonth: 9, label: '夏秋作' },
-      { plantMonth: 7, harvestMonth: 10, label: '秋作' },
-    ],
-    price: {1:12.6,2:9.8,3:9.1,4:11.3,5:16.5,6:21.2,7:29.3,8:46.6,9:48.9,10:43.1,11:26.1,12:19.1},
-    // yield kg per 分 per 輪
-    yieldPerTan: 800,
-  },
-  {
-    id: 'cabbage_imp', name: '甘藍-改良種', family: 'brassica', cycle: 85,
-    ph: [5.5, 7.0], soils: ['loam','clay'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '全年可種，適應性廣，注意蚜蟲',
-    rotationBlock: ['brassica'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [8,9,10],
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 6, harvestMonth: 9, label: '秋作' },
-      { plantMonth: 7, harvestMonth: 10, label: '秋作' },
-    ],
-    price: {1:13.8,2:14.4,3:6.9,4:9.3,5:14.7,6:17.1,7:21.0,8:30.0,9:31.6,10:27.3,11:21.0,12:17.3},
-    yieldPerTan: 900,
-  },
-  {
-    id: 'radish', name: '蘿蔔-矸仔', family: 'brassica', cycle: 70,
-    ph: [5.8, 7.0], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '需砂質或壤土，黏土容易歪根，生長快',
-    rotationBlock: ['brassica'],
-    typhoonRisk: [7,8,9], coldRisk: [],
-    peakHarvestMonths: [8,9],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 7, harvestMonth: 9, label: '秋作' },
-      { plantMonth: 11, harvestMonth: 1, label: '冬作' },
-    ],
-    price: {1:11.1,2:9.3,3:8.9,4:10.3,5:10.0,6:11.2,7:13.9,8:27.8,9:25.1,10:12.8,11:15.2,12:13.7},
-    yieldPerTan: 1200,
-  },
-  {
-    id: 'napa', name: '包心白-包白', family: 'brassica', cycle: 75,
-    ph: [6.0, 7.0], soils: ['loam','clay'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '秋冬最佳，夏季易軟腐，連作需留意',
-    rotationBlock: ['brassica'],
-    typhoonRisk: [7,8,9], coldRisk: [],
-    peakHarvestMonths: [8,9,10],
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 6, harvestMonth: 9, label: '秋作' },
-    ],
-    price: {1:11.8,2:10.2,3:15.3,4:15.0,5:16.6,6:12.7,7:16.0,8:28.1,9:20.9,10:22.2,11:21.0,12:14.2},
-    yieldPerTan: 1000,
-  },
-  {
-    id: 'tomato', name: '番茄-牛番茄', family: 'solanaceae', cycle: 100,
-    ph: [6.0, 6.8], soils: ['sandy','loam'], env: ['net','both'],
-    irrigation: ['drip'], region: ['north','central','south','east'],
-    exp: ['mid','expert'], difficulty: 3,
-    notes: '需網室防蟲，滴灌控濕，連作至少間隔 3 個月',
-    rotationBlock: ['solanaceae'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [9,10,11,12],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 9, label: '秋作' },
-      { plantMonth: 7, harvestMonth: 10, label: '秋冬作' },
-      { plantMonth: 8, harvestMonth: 11, label: '冬作' },
-    ],
-    price: {1:47.4,2:30.3,3:27.4,4:24.4,5:38.6,6:35.0,7:64.5,8:76.9,9:108.9,10:93.4,11:94.1,12:75.2},
-    yieldPerTan: 600,
-  },
-  {
-    id: 'cucumber', name: '花胡瓜', family: 'cucurbit', cycle: 55,
-    ph: [5.5, 6.8], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 2,
-    notes: '怕積水，砂質壤土最好，可多批次種植',
-    rotationBlock: ['cucurbit'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [8,10,11],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 8, harvestMonth: 10, label: '秋作' },
-      { plantMonth: 9, harvestMonth: 11, label: '秋作' },
-    ],
-    price: {1:46.4,2:44.9,3:41.5,4:32.1,5:34.0,6:40.2,7:56.5,8:78.5,9:45.5,10:64.8,11:67.2,12:49.8},
-    yieldPerTan: 700,
-  },
-  {
-    id: 'carrot', name: '胡蘿蔔-清洗', family: 'apiaceae', cycle: 110,
-    ph: [6.0, 7.0], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','manual'], region: ['north','central','south','east'],
-    exp: ['mid','expert'], difficulty: 2,
-    notes: '需深耕 30cm，黏土不適合，冬季價格佳',
-    rotationBlock: ['apiaceae'],
-    typhoonRisk: [7,8], coldRisk: [],
-    peakHarvestMonths: [10,11,12],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 10, label: '秋冬作' },
-      { plantMonth: 7, harvestMonth: 11, label: '冬作' },
-      { plantMonth: 8, harvestMonth: 12, label: '冬作' },
-    ],
-    price: {1:15.0,2:12.7,3:12.1,4:12.7,5:14.0,6:16.0,7:17.8,8:21.0,9:23.8,10:27.0,11:31.0,12:24.6},
-    yieldPerTan: 900,
-  },
-  {
-    id: 'loofah', name: '絲瓜', family: 'cucurbit', cycle: 65,
-    ph: [5.5, 6.8], soils: ['sandy','loam','clay'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '搭棚架種植，耐熱，夏季高溫反而高產',
-    rotationBlock: ['cucurbit'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [8,11],
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 9, harvestMonth: 11, label: '秋作' },
-    ],
-    price: {1:40.2,2:34.8,3:38.7,4:30.9,5:25.2,6:24.1,7:31.6,8:51.4,9:31.8,10:39.1,11:45.9,12:37.8},
-    yieldPerTan: 600,
-  },
-  {
-    id: 'bokchoy', name: '小白菜-蚵仔白', family: 'brassica', cycle: 35,
-    ph: [6.0, 7.0], soils: ['loam','clay'], env: ['open','net','both'],
-    irrigation: ['sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '生長快（35天），可密集輪作，但波動大',
-    rotationBlock: ['brassica'],
-    typhoonRisk: [7,8,9], coldRisk: [],
-    peakHarvestMonths: [7,8,10],
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 7, label: '夏作' },
-      { plantMonth: 6, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 9, harvestMonth: 10, label: '秋作' },
-    ],
-    price: {1:18.2,2:16.2,3:20.1,4:16.1,5:21.8,6:22.4,7:39.7,8:50.8,9:29.4,10:50.6,11:28.0,12:20.6},
-    yieldPerTan: 400,
-  },
-  {
-    id: 'corn', name: '玉米-甜軟殼', family: 'grass', cycle: 80,
-    ph: [5.8, 7.0], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler','manual'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 1,
-    notes: '需充足日照，授粉需密植，連作可（不同科）',
-    rotationBlock: [],
-    typhoonRisk: [7,8,9], coldRisk: [],
-    peakHarvestMonths: [8,11],
-    plantWindows: [
-      { plantMonth: 5, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 8, harvestMonth: 11, label: '秋作' },
-    ],
-    price: {1:28.3,2:22.9,3:23.1,4:18.3,5:19.9,6:17.1,7:29.4,8:43.1,9:34.6,10:30.7,11:44.2,12:35.2},
-    yieldPerTan: 300,
-  },
-  {
-    id: 'bm_white', name: '苦瓜-白大米', family: 'cucurbit', cycle: 55,
-    ph: [5.5, 6.5], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler'], region: ['north','central','south','east'],
-    exp: ['beginner','mid','expert'], difficulty: 2,
-    notes: '耐熱耐濕，需搭棚架，颱風季前採收高價',
-    rotationBlock: ['cucurbit'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [2,8],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 8, label: '夏作（颱風高峰）' },
-      { plantMonth: 12, harvestMonth: 2, label: '冬作（冬季高價）' },
-    ],
-    price: {1:69.2,2:82.6,3:75.3,4:49.1,5:40.5,6:28.9,7:38.5,8:83.4,9:70.1,10:73.5,11:70.6,12:66.6},
-    yieldPerTan: 500,
-  },
-  {
-    id: 'bm_green', name: '苦瓜-翠綠', family: 'cucurbit', cycle: 50,
-    ph: [5.5, 6.5], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','sprinkler'], region: ['north','central','south','east'],
-    exp: ['mid','expert'], difficulty: 2,
-    notes: '單價比白大米高，冬季表現最強（2月均價 93元）',
-    rotationBlock: ['cucurbit'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [2,8],
-    plantWindows: [
-      { plantMonth: 6, harvestMonth: 8, label: '夏作' },
-      { plantMonth: 12, harvestMonth: 2, label: '冬作（最強）' },
-      { plantMonth: 11, harvestMonth: 1, label: '冬作' },
-    ],
-    price: {1:77.5,2:92.8,3:77.0,4:46.0,5:27.1,6:23.1,7:46.5,8:84.3,9:51.7,10:51.1,11:51.8,12:60.2},
-    yieldPerTan: 450,
-  },
-  {
-    id: 'bm_mountain', name: '苦瓜-山苦瓜', family: 'cucurbit', cycle: 65,
-    ph: [5.5, 6.5], soils: ['sandy','loam'], env: ['open','net','both'],
-    irrigation: ['drip','manual'], region: ['north','central','south','east'],
-    exp: ['mid','expert'], difficulty: 3,
-    notes: '均價最高（84元），3月達 122元，但量少市場小',
-    rotationBlock: ['cucurbit'],
-    typhoonRisk: [7,8,9], coldRisk: [1,2],
-    peakHarvestMonths: [2,3,10,11],
-    plantWindows: [
-      { plantMonth: 1, harvestMonth: 3, label: '冬末作（最高價）' },
-      { plantMonth: 12, harvestMonth: 2, label: '冬作' },
-      { plantMonth: 8, harvestMonth: 10, label: '秋作' },
-    ],
-    price: {1:95.4,2:109.7,3:122.6,4:82.0,5:64.7,6:46.4,7:47.1,8:79.8,9:84.7,10:95.6,11:94.3,12:87.6},
-    yieldPerTan: 300,
-  },
+  { id:'cab_fall',  name:'甘藍-初秋',    family:'brassica',    cycle:80,  ph:[5.5,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'秋冬最佳，連作易根腫病',   typhoon:[7,8,9], cold:[1,2,12], yieldPerTan:800,  price:{1:12.6,2:9.8,3:9.1,4:11.3,5:16.5,6:21.2,7:29.3,8:46.6,9:48.9,10:43.1,11:26.1,12:19.1} },
+  { id:'cab_imp',   name:'甘藍-改良種',  family:'brassica',    cycle:85,  ph:[5.5,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'適應性廣，注意蚜蟲',     typhoon:[7,8,9], cold:[1,2],   yieldPerTan:900,  price:{1:13.8,2:14.4,3:6.9,4:9.3,5:14.7,6:17.1,7:21.0,8:30.0,9:31.6,10:27.3,11:21.0,12:17.3} },
+  { id:'radish',    name:'蘿蔔-矸仔',    family:'brassica',    cycle:70,  ph:[5.8,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['beginner','mid','expert'], diff:1, notes:'砂壤最佳，黏土易歪根',   typhoon:[7,8,9], cold:[],      yieldPerTan:1200, price:{1:11.1,2:9.3,3:8.9,4:10.3,5:10.0,6:11.2,7:13.9,8:27.8,9:25.1,10:12.8,11:15.2,12:13.7} },
+  { id:'napa',      name:'包心白-包白',  family:'brassica',    cycle:75,  ph:[6.0,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'夏季易軟腐，秋冬較穩', typhoon:[7,8,9], cold:[],      yieldPerTan:1000, price:{1:11.8,2:10.2,3:15.3,4:15.0,5:16.6,6:12.7,7:16.0,8:28.1,9:20.9,10:22.2,11:21.0,12:14.2} },
+  { id:'tomato',    name:'番茄-牛番茄',  family:'solanaceae',  cycle:100, ph:[6.0,6.8], soils:['sandy','loam'], env:['net','both'],         irr:['drip'],                      exp:['mid','expert'],            diff:3, notes:'需網室＋滴灌，連作間隔 3 個月', typhoon:[7,8,9], cold:[1,2], yieldPerTan:600, price:{1:47.4,2:30.3,3:27.4,4:24.4,5:38.6,6:35.0,7:64.5,8:76.9,9:108.9,10:93.4,11:94.1,12:75.2} },
+  { id:'cucumber',  name:'花胡瓜',       family:'cucurbit',    cycle:55,  ph:[5.5,6.8], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'怕積水，可多批種植',    typhoon:[7,8,9], cold:[1,2],   yieldPerTan:700,  price:{1:46.4,2:44.9,3:41.5,4:32.1,5:34.0,6:40.2,7:56.5,8:78.5,9:45.5,10:64.8,11:67.2,12:49.8} },
+  { id:'carrot',    name:'胡蘿蔔-清洗',  family:'apiaceae',    cycle:110, ph:[6.0,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:2, notes:'需深耕 30cm，冬季高價', typhoon:[7,8],   cold:[],      yieldPerTan:900,  price:{1:15.0,2:12.7,3:12.1,4:12.7,5:14.0,6:16.0,7:17.8,8:21.0,9:23.8,10:27.0,11:31.0,12:24.6} },
+  { id:'loofah',    name:'絲瓜',         family:'cucurbit',    cycle:65,  ph:[5.5,6.8], soils:['sandy','loam','clay'], env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'搭棚架，耐熱',      typhoon:[7,8,9], cold:[1,2],   yieldPerTan:600,  price:{1:40.2,2:34.8,3:38.7,4:30.9,5:25.2,6:24.1,7:31.6,8:51.4,9:31.8,10:39.1,11:45.9,12:37.8} },
+  { id:'bokchoy',   name:'小白菜-蚵仔白',family:'brassica',    cycle:35,  ph:[6.0,7.0], soils:['loam','clay'],  env:['open','net','both'], irr:['sprinkler','manual'],        exp:['beginner','mid','expert'], diff:1, notes:'35天快速輪作，波動大', typhoon:[7,8,9], cold:[],      yieldPerTan:400,  price:{1:18.2,2:16.2,3:20.1,4:16.1,5:21.8,6:22.4,7:39.7,8:50.8,9:29.4,10:50.6,11:28.0,12:20.6} },
+  { id:'corn',      name:'玉米-甜軟殼',  family:'grass',       cycle:80,  ph:[5.8,7.0], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler','manual'], exp:['beginner','mid','expert'], diff:1, notes:'需密植授粉，耐連作',   typhoon:[7,8,9], cold:[],      yieldPerTan:300,  price:{1:28.3,2:22.9,3:23.1,4:18.3,5:19.9,6:17.1,7:29.4,8:43.1,9:34.6,10:30.7,11:44.2,12:35.2} },
+  { id:'bm_white',  name:'苦瓜-白大米',  family:'cucurbit',    cycle:55,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['beginner','mid','expert'], diff:2, notes:'耐熱，需棚架，颱風前高價', typhoon:[7,8,9], cold:[1,2], yieldPerTan:500, price:{1:69.2,2:82.6,3:75.3,4:49.1,5:40.5,6:28.9,7:38.5,8:83.4,9:70.1,10:73.5,11:70.6,12:66.6} },
+  { id:'bm_green',  name:'苦瓜-翠綠',    family:'cucurbit',    cycle:50,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','sprinkler'],          exp:['mid','expert'],            diff:2, notes:'冬季均價最強（2月93元）', typhoon:[7,8,9], cold:[1,2], yieldPerTan:450, price:{1:77.5,2:92.8,3:77.0,4:46.0,5:27.1,6:23.1,7:46.5,8:84.3,9:51.7,10:51.1,11:51.8,12:60.2} },
+  { id:'bm_mtn',    name:'苦瓜-山苦瓜',  family:'cucurbit',    cycle:65,  ph:[5.5,6.5], soils:['sandy','loam'], env:['open','net','both'], irr:['drip','manual'],             exp:['mid','expert'],            diff:3, notes:'均價最高，3月達122元', typhoon:[7,8,9], cold:[1,2],  yieldPerTan:300, price:{1:95.4,2:109.7,3:122.6,4:82.0,5:64.7,6:46.4,7:47.1,8:79.8,9:84.7,10:95.6,11:94.3,12:87.6} },
 ];
 
-// ── 勝率資料（來自 xgb_v3 分類模型）────────────────────────
 const WIN_RATE = {
-  '甘藍-初秋':    { t60: { win: 69, avoid: 87 }, t90: { win: 69, avoid: 82 } },
-  '甘藍-改良種':  { t60: { win: 62, avoid: 64 }, t90: { win: 63, avoid: 69 } },
-  '蘿蔔-矸仔':    { t60: { win: 75, avoid: 62 }, t90: { win: 72, avoid: 69 } },
-  '包心白-包白':  { t60: { win: 55, avoid: 68 }, t90: { win: 43, avoid: 54 } },
-  '番茄-牛番茄':  { t60: { win: 70, avoid: 61 }, t90: { win: 66, avoid: 58 } },
-  '花胡瓜':       { t60: { win: 61, avoid: 46 }, t90: { win: 71, avoid: 52 } },
-  '胡蘿蔔-清洗':  { t60: { win: 44, avoid: 70 }, t90: { win: 55, avoid: 84 } },
-  '絲瓜':         { t60: { win: 53, avoid: 57 }, t90: { win: 63, avoid: 57 } },
-  '小白菜-蚵仔白':{ t60: { win: 51, avoid: 47 }, t90: { win: 55, avoid: 68 } },
-  '玉米-甜軟殼':  { t60: { win: 61, avoid: 62 }, t90: { win: 58, avoid: 55 } },
-  '苦瓜-白大米':  { t60: { win: 80, avoid: 40 }, t90: { win: 53, avoid: 48 } },
-  '苦瓜-翠綠':    { t60: { win: 67, avoid: 47 }, t90: { win: 86, avoid: 56 } },
-  '苦瓜-山苦瓜':  { t60: { win: 59, avoid: 51 }, t90: { win: 59, avoid: 41 } },
+  '甘藍-初秋':    {win:69,avoid:84}, '甘藍-改良種':  {win:62,avoid:67},
+  '蘿蔔-矸仔':    {win:74,avoid:66}, '包心白-包白':  {win:49,avoid:61},
+  '番茄-牛番茄':  {win:68,avoid:60}, '花胡瓜':       {win:66,avoid:49},
+  '胡蘿蔔-清洗':  {win:50,avoid:77}, '絲瓜':         {win:58,avoid:57},
+  '小白菜-蚵仔白':{win:53,avoid:58}, '玉米-甜軟殼':  {win:60,avoid:59},
+  '苦瓜-白大米':  {win:67,avoid:44}, '苦瓜-翠綠':    {win:77,avoid:52},
+  '苦瓜-山苦瓜':  {win:59,avoid:46},
 };
 
-// ── 篩選與評分邏輯 ───────────────────────────────────────────
-function scoreCrop(crop, cond) {
-  let score = 0; const reasons = []; const warnings = [];
+// 成本預設（元/分地/輪）
+const DEFAULT_COSTS = {
+  brassica:   {seed:500,  fert:1500, pest:800,  labor:3000},
+  solanaceae: {seed:2000, fert:2500, pest:1500, labor:5000},
+  cucurbit:   {seed:1500, fert:2000, pest:1200, labor:4000},
+  grass:      {seed:800,  fert:1800, pest:600,  labor:2500},
+  apiaceae:   {seed:600,  fert:1500, pest:800,  labor:3500},
+};
 
-  // pH 適合度
-  const ph = parseFloat(cond.ph);
-  if (ph >= crop.ph[0] && ph <= crop.ph[1]) { score += 25; reasons.push(`pH ${ph} 適合`); }
-  else { score -= 15; warnings.push(`pH 不在理想範圍 ${crop.ph[0]}–${crop.ph[1]}`); }
+// ── 地塊管理 ────────────────────────────────────────────────
+let plotId = 0;
+const plots = [];
 
-  // 土壤
-  if (crop.soils.includes(cond.soil)) { score += 20; reasons.push('土壤類型吻合'); }
-  else { score -= 10; warnings.push('土壤類型不理想'); }
-
-  // 環境
-  if (crop.env.includes(cond.env) || crop.env.includes('both')) { score += 15; }
-
-  // 灌溉
-  if (crop.irrigation.includes(cond.irrigation)) { score += 10; }
-  else { warnings.push('灌溉方式不完全吻合'); }
-
-  // 難度 vs 經驗
-  const expScore = { beginner: 1, mid: 2, expert: 3 }[cond.exp];
-  if (crop.difficulty <= expScore) { score += 10; }
-  else { score -= 10; warnings.push(`難度較高（建議有經驗者）`); }
-
-  // 勝率加分（取 t60 和 t90 均值）
-  const wr = WIN_RATE[crop.name];
-  if (wr) {
-    const avgWin = (wr.t60.win + wr.t90.win) / 2;
-    score += Math.round((avgWin - 50) * 0.4);
-  }
-
-  // 黏土限制根莖類
-  if (cond.soil === 'clay' && ['radish','carrot'].includes(crop.id)) {
-    score -= 20; warnings.push('黏土不適合根莖類');
-  }
-
-  return { score: Math.max(0, Math.min(100, score + 50)), reasons, warnings };
+function addPlot(name='', area=3, soil='loam', ph=6.5) {
+  const id = ++plotId;
+  plots.push({id, name: name || `地塊 ${id}`, area, soil, ph});
+  renderPlots();
+}
+function removePlot(id) {
+  const i = plots.findIndex(p=>p.id===id);
+  if(i>=0) plots.splice(i,1);
+  renderPlots();
+}
+function renderPlots() {
+  const el = document.getElementById('plotsList');
+  if(plots.length===0){ el.innerHTML='<div style="color:var(--muted);font-size:13px">尚未新增地塊</div>'; return; }
+  el.innerHTML = plots.map(p=>`
+    <div class="plot-row">
+      <div><label>地塊名稱</label>
+        <input type="text" value="${p.name}" onchange="plots.find(x=>x.id==${p.id}).name=this.value"></div>
+      <div><label>面積（分）</label>
+        <input type="number" value="${p.area}" min="0.5" step="0.5" onchange="plots.find(x=>x.id==${p.id}).area=parseFloat(this.value)||1"></div>
+      <div><label>土壤類型</label>
+        <select onchange="plots.find(x=>x.id==${p.id}).soil=this.value">
+          <option value="sandy" ${p.soil==='sandy'?'selected':''}>砂質土</option>
+          <option value="loam"  ${p.soil==='loam' ?'selected':''}>壤土</option>
+          <option value="clay"  ${p.soil==='clay' ?'selected':''}>黏土</option>
+        </select></div>
+      <div><label>pH　<b style="color:var(--cyan)" id="phv${p.id}">${p.ph}</b></label>
+        <input type="range" min="4.5" max="7.5" step="0.1" value="${p.ph}"
+          oninput="document.getElementById('phv${p.id}').textContent=this.value;plots.find(x=>x.id==${p.id}).ph=parseFloat(this.value)"></div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+        <button class="btn-del" onclick="removePlot(${p.id})">✕ 移除</button></div>
+    </div>`).join('');
 }
 
-function getBestWindows(crop, startMonth) {
-  // 在 12 個月內找到最好的種植窗口
-  return crop.plantWindows.map(w => {
-    const harvestPrice = crop.price[w.harvestMonth];
-    const avgPrice = Object.values(crop.price).reduce((a,b)=>a+b,0) / 12;
-    const priceRatio = harvestPrice / avgPrice;
-    return { ...w, harvestPrice, priceRatio };
-  }).sort((a,b) => b.harvestPrice - a.harvestPrice);
+// ── 成本表 ───────────────────────────────────────────────────
+const cropCosts = {};
+CROPS.forEach(c => {
+  const def = DEFAULT_COSTS[c.family] || DEFAULT_COSTS.brassica;
+  cropCosts[c.id] = {...def};
+});
+
+function renderCostsTable() {
+  const t = document.getElementById('costsTable');
+  const rows = CROPS.map(c=>{
+    const co = cropCosts[c.id];
+    return `<tr>
+      <td>${c.name}</td>
+      <td><input type="number" value="${co.seed}"  onchange="cropCosts['${c.id}'].seed=+this.value"  min="0"></td>
+      <td><input type="number" value="${co.fert}"  onchange="cropCosts['${c.id}'].fert=+this.value"  min="0"></td>
+      <td><input type="number" value="${co.pest}"  onchange="cropCosts['${c.id}'].pest=+this.value"  min="0"></td>
+      <td><input type="number" value="${co.labor}" onchange="cropCosts['${c.id}'].labor=+this.value" min="0"></td>
+      <td class="num" id="totalcost_${c.id}">${co.seed+co.fert+co.pest+co.labor}</td>
+    </tr>`;
+  }).join('');
+  t.innerHTML = `<thead><tr><th>作物</th><th>種苗費</th><th>肥料</th><th>農藥</th><th>人工</th><th>合計/分</th></tr></thead>
+    <tbody>${rows}</tbody>`;
+}
+function toggleCosts() {
+  const p = document.getElementById('costsPanel');
+  p.style.display = p.style.display==='none' ? 'block' : 'none';
 }
 
-// ── 甘特圖資料產生 ───────────────────────────────────────────
-function buildGanttData(crop, topWindow) {
-  const result = {};
-  const months = Array.from({length:12},(_,i)=>i+1);
-  const plantM = topWindow.plantMonth;
-  const harvestM = topWindow.harvestMonth;
-  const cycleMonths = Math.ceil(crop.cycle / 30);
+// ── 評分 ─────────────────────────────────────────────────────
+function scoreCrop(crop, cond, plot) {
+  let score = 50;
+  const ph = plot.ph;
+  if(ph>=crop.ph[0] && ph<=crop.ph[1]) score+=25; else score-=12;
+  if(crop.soils.includes(plot.soil)) score+=20; else score-=10;
+  if(crop.env.includes(cond.env)||crop.env.includes('both')) score+=15;
+  if(crop.irr.includes(cond.irrigation)) score+=10;
+  const expMap={beginner:1,mid:2,expert:3};
+  if(crop.diff<=expMap[cond.exp]) score+=10; else score-=10;
+  // 黏土不種根莖類
+  if(plot.soil==='clay'&&['radish','carrot'].includes(crop.id)) score-=25;
+  // 勝率加分
+  const wr=WIN_RATE[crop.name];
+  if(wr) score+=Math.round((wr.win-55)*0.3);
+  return Math.max(0,Math.min(100,score));
+}
 
-  months.forEach(m => {
-    let type = 'empty';
-    // 判斷這個月在哪個階段
-    if (m === plantM) type = 'plant';
-    else {
-      // 收成月
-      if (m === harvestM) {
-        const price = crop.price[m];
-        const avg = Object.values(crop.price).reduce((a,b)=>a+b,0)/12;
-        type = price > avg * 1.2 ? 'harvest-hi' : price > avg * 0.85 ? 'harvest-med' : 'harvest-lo';
-      } else {
-        // 生長期：plantMonth 和 harvestMonth 之間
-        let inGrow = false;
-        if (plantM < harvestM) inGrow = m > plantM && m < harvestM;
-        else inGrow = m > plantM || m < harvestM; // 跨年
-        if (inGrow) type = 'grow';
-      }
-    }
-
-    // 疊加風險
-    const extra = [];
-    if (crop.typhoonRisk.includes(m)) extra.push('risk-typhoon');
-    if (crop.coldRisk.includes(m)) extra.push('risk-cold');
-    result[m] = { type, extra };
+// ── 排程算法 ─────────────────────────────────────────────────
+function schedulePlot(plot, cond) {
+  // 將 12 個月拆成種植槽，從 startMonth 開始，每輪結束後接下一輪
+  const avgPrices = {};
+  CROPS.forEach(c => {
+    avgPrices[c.id] = Object.values(c.price).reduce((a,b)=>a+b,0)/12;
   });
-  return result;
+
+  const assignments = [];
+  let currentMonth = parseInt(cond.startMonth);
+  let lastFamily = null;
+  const maxRounds = 6; // 最多排 6 輪（避免無限迴圈）
+
+  for(let round=0; round<maxRounds; round++){
+    // 候選作物：符合條件，且不與上一輪同科
+    const candidates = CROPS
+      .filter(c => !(c.family===lastFamily && lastFamily!=='' && lastFamily!=='grass'))
+      .map(c => {
+        const harvestMonth = ((currentMonth-1+Math.round(c.cycle/30))%12)+1;
+        const price = c.price[harvestMonth];
+        const priceRatio = price/avgPrices[c.id];
+        const score = scoreCrop(c, cond, plot);
+        return {crop:c, harvestMonth, price, priceRatio, score, combined: score*0.5 + priceRatio*50};
+      })
+      .sort((a,b)=>b.combined-a.combined);
+
+    if(!candidates.length) break;
+    const chosen = candidates[0];
+    assignments.push({
+      crop: chosen.crop,
+      plantMonth: currentMonth,
+      harvestMonth: chosen.harvestMonth,
+      price: chosen.price,
+      priceRatio: chosen.priceRatio,
+    });
+    lastFamily = chosen.crop.family;
+
+    // 下一輪種植月 = 本輪收成月 + 1（休耕一個月）
+    currentMonth = (chosen.harvestMonth%12)+1;
+
+    // 如果已繞完一整年，停止
+    const totalMonthsCovered = assignments.reduce((s,a)=>{
+      const m = Math.round(a.crop.cycle/30)+1;
+      return s+m;
+    },0);
+    if(totalMonthsCovered>=12) break;
+  }
+  return assignments;
 }
 
-// ── 主邏輯 ───────────────────────────────────────────────────
+// ── 主函數 ───────────────────────────────────────────────────
 function runPlanner() {
+  if(plots.length===0){ alert('請先新增至少一塊地塊！'); return; }
   const cond = {
-    region: document.getElementById('region').value,
     env: document.getElementById('env').value,
-    soil: document.getElementById('soil').value,
     irrigation: document.getElementById('irrigation').value,
-    ph: document.getElementById('ph').value,
-    area: parseFloat(document.getElementById('area').value) || 5,
     exp: document.getElementById('exp').value,
     startMonth: parseInt(document.getElementById('startMonth').value),
   };
 
-  // 評分並排序
-  const scored = CROPS.map(crop => ({
-    crop,
-    ...scoreCrop(crop, cond),
-    windows: getBestWindows(crop, cond.startMonth),
-  })).sort((a,b) => b.score - a.score);
+  const allSchedules = plots.map(plot=>({
+    plot,
+    assignments: schedulePlot(plot, cond),
+  }));
 
-  // 取前 6 名
-  const top = scored.slice(0, 6);
-
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('results').style.display = 'block';
-
-  renderCards(top);
-  renderGantt(top);
-  renderRevTable(top, cond.area);
+  document.getElementById('results').style.display='block';
+  renderGantt(allSchedules);
+  renderNetTable(allSchedules);
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function renderCards(items) {
-  const MONTHS = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const container = document.getElementById('cropCards');
-  container.innerHTML = items.map((item, idx) => {
-    const { crop, score, warnings, windows } = item;
-    const bestWin = windows[0];
-    const wr = WIN_RATE[crop.name];
-    const avgWin = wr ? Math.round((wr.t60.win + wr.t90.win) / 2) : '-';
-    const avgAvoid = wr ? Math.round((wr.t60.avoid + wr.t90.avoid) / 2) : '-';
-    const badgeClass = idx === 0 ? 'badge-best' : idx < 3 ? 'badge-good' : 'badge-ok';
-    const badgeText = idx === 0 ? '最推薦' : idx < 3 ? '推薦' : '可考慮';
-    const diffStr = ['','★','★★','★★★'][crop.difficulty];
-    const priceClass = bestWin.priceRatio > 1.2 ? 'hi' : bestWin.priceRatio > 0.9 ? 'med' : 'lo';
+// ── 甘特圖 ───────────────────────────────────────────────────
+const CROP_COLORS = [
+  'rgba(167,139,250,', 'rgba(34,211,238,',  'rgba(74,222,128,',
+  'rgba(251,191,36,',  'rgba(248,113,113,', 'rgba(251,146,60,',
+];
+const MONTHS_LBL = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
-    return `<div class="crop-card ${idx===0?'top':''}">
-      <div class="badge ${badgeClass}">${badgeText}</div>
-      <div class="crop-name">${crop.name}</div>
-      <div class="crop-meta">
-        <span class="tag">種植週期 ${crop.cycle}天</span>
-        <span class="tag">難度 ${diffStr}</span>
-        ${warnings.map(w=>`<span class="tag warn">⚠ ${w}</span>`).join('')}
-      </div>
-      <div class="crop-score-bar"><div class="crop-score-fill" style="width:${score}%"></div></div>
-      <div class="crop-stats">
-        <div class="stat"><div class="val ${priceClass}">${bestWin.harvestPrice}</div><div class="lbl">收成均價</div></div>
-        <div class="stat"><div class="val" style="color:var(--cyan)">${avgWin}%</div><div class="lbl">種時贏率</div></div>
-        <div class="stat"><div class="val" style="color:var(--purple)">${avgAvoid}%</div><div class="lbl">避虧率</div></div>
-      </div>
-      <div class="best-plant">
-        最佳種植：<span>${MONTHS[bestWin.plantMonth]}</span> 種 → <span>${MONTHS[bestWin.harvestMonth]}</span> 收（${bestWin.label}）
-        ${crop.notes ? `<br><span style="color:var(--muted)">${crop.notes}</span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
+function renderGantt(schedules) {
+  const wrap = document.getElementById('gantt');
+  const header = `<div class="gantt-header"><div></div>${MONTHS_LBL.map(m=>`<div class="mh">${m}</div>`).join('')}</div>`;
+  const warns = [];
 
-function renderGantt(items) {
-  const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const gantt = document.getElementById('gantt');
-  const header = `<div class="cal-header">
-    <div></div>
-    ${MONTHS.map(m=>`<div class="month-lbl">${m}</div>`).join('')}
-  </div>`;
+  const plotRows = schedules.map(({plot, assignments})=>{
+    // 檢查連作警告
+    const families = assignments.map(a=>a.crop.family);
+    for(let i=1;i<families.length;i++){
+      if(families[i]===families[i-1] && families[i]!=='grass'){
+        warns.push(`${plot.name}：連續種植同科（${families[i]}）— ${assignments[i-1].crop.name} → ${assignments[i].crop.name}`);
+      }
+    }
 
-  const rows = items.map(item => {
-    const { crop, windows } = item;
-    const ganttData = buildGanttData(crop, windows[0]);
+    // 為每個作物分配顏色
+    const cropColorMap = {};
+    let colorIdx = 0;
+    assignments.forEach(a=>{
+      if(!cropColorMap[a.crop.id]) cropColorMap[a.crop.id] = CROP_COLORS[colorIdx++ % CROP_COLORS.length];
+    });
+
+    const monthData = {};
+    for(let m=1;m<=12;m++) monthData[m]={type:'empty',color:null,extra:[]};
+
+    assignments.forEach(({crop, plantMonth, harvestMonth, price})=>{
+      const col = cropColorMap[crop.id];
+      const avg = Object.values(crop.price).reduce((a,b)=>a+b,0)/12;
+      const hClass = price>avg*1.2 ? 'h-hi' : price>avg*0.85 ? 'h-med' : 'h-lo';
+
+      // 填充月份
+      let m = plantMonth;
+      let monthsLeft = Math.round(crop.cycle/30)+1;
+      for(let i=0;i<monthsLeft;i++){
+        const cur = ((m-1+i)%12)+1;
+        if(cur===plantMonth) monthData[cur]={type:'plant',color:col,extra:[]};
+        else if(cur===harvestMonth) monthData[cur]={type:hClass,color:col,extra:[]};
+        else if(monthData[cur].type==='empty') monthData[cur]={type:'grow',color:col,extra:[]};
+      }
+
+      // 風險標記
+      crop.typhoon.forEach(t=>{ if(monthData[t]) monthData[t].extra.push('typhoon'); });
+      crop.cold.forEach(t=>{    if(monthData[t]) monthData[t].extra.push('cold'); });
+    });
+
+    // 圖例行（本地塊用到的作物）
+    const legendItems = assignments.map(a=>{
+      const col=cropColorMap[a.crop.id];
+      return `<div class="cc-item"><div class="cc-dot" style="background:${col}0.7)"></div>${a.crop.name}</div>`;
+    });
+    const legendRow = `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;font-size:11px">${legendItems.join('')}</div>`;
+
     const cells = Array.from({length:12},(_,i)=>{
-      const d = ganttData[i+1];
-      return `<div class="cal-cell ${d.type} ${d.extra.join(' ')}" data-tip="${getCellTip(crop, i+1, d)}"></div>`;
+      const d=monthData[i+1];
+      const bg = d.color ? `background:${d.color}${d.type==='plant'?'0.5':d.type==='grow'?'0.2':'0.6'})` : '';
+      return `<div class="g-cell ${d.type} ${d.extra.join(' ')}" style="${bg}" title="${MONTHS_LBL[i]}"></div>`;
     }).join('');
-    return `<div class="cal-row">
-      <div class="cal-crop-name">${crop.name}</div>
-      ${cells}
-    </div>`;
+
+    return `<div class="gantt-plot-label">📍 ${plot.name}（${plot.area}分地）</div>
+      ${legendRow}
+      <div class="gantt-row"><div class="g-name">種植排程</div>${cells}</div>`;
   }).join('');
 
-  gantt.innerHTML = header + rows;
+  wrap.innerHTML = header + plotRows;
+
+  // 輪作警告
+  const warnEl = document.getElementById('rotationWarns');
+  warnEl.innerHTML = warns.length
+    ? `<div class="rotation-warn"><b>⚠ 輪作警告</b>${warns.map(w=>`<div>• ${w}</div>`).join('')}</div>`
+    : '';
 }
 
-function getCellTip(crop, month, data) {
-  const MNAMES = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const price = crop.price[month];
-  const tips = [`${MNAMES[month]} 均價 ${price}元`];
-  if (data.type === 'plant') tips.push('種植');
-  if (data.type === 'grow') tips.push('生長期');
-  if (data.type.startsWith('harvest')) tips.push('收成');
-  if (data.extra.includes('risk-typhoon')) tips.push('⚠颱風季');
-  if (data.extra.includes('risk-cold')) tips.push('⚠低溫風險');
-  return tips.join(' | ');
-}
+// ── 淨利表 ───────────────────────────────────────────────────
+function renderNetTable(schedules) {
+  const rows = [];
+  let totalRevenue=0, totalCost=0;
 
-function renderRevTable(items, area) {
-  const table = document.getElementById('revTable');
-  const MONTHS = ['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const rows = items.map(item => {
-    const { crop, windows } = item;
-    const bestWin = windows[0];
-    // 一分地的粗估收益 = yieldPerTan * 收成均價 * 0.6（市場良率 60%）
-    const revenuePerTan = crop.yieldPerTan * bestWin.harvestPrice * 0.6 / 1000; // 千元
-    const totalRevenue = (revenuePerTan * area).toFixed(1);
-    const wr = WIN_RATE[crop.name];
-    const winRate = wr ? Math.round((wr.t60.win + wr.t90.win) / 2) : '-';
-    const priceClass = bestWin.priceRatio > 1.2 ? 'hi' : bestWin.priceRatio > 0.9 ? 'med' : 'lo';
-    return `<tr>
-      <td>${crop.name}</td>
-      <td>${MONTHS[bestWin.plantMonth]} → ${MONTHS[bestWin.harvestMonth]}</td>
-      <td class="num">${bestWin.harvestPrice} 元/kg</td>
-      <td class="num">${crop.yieldPerTan} kg/分</td>
-      <td class="num ${priceClass}">${totalRevenue} 千元</td>
-      <td class="num" style="color:var(--cyan)">${winRate}%</td>
-    </tr>`;
+  schedules.forEach(({plot, assignments})=>{
+    assignments.forEach(({crop, plantMonth, harvestMonth, price})=>{
+      const co = cropCosts[crop.id];
+      const costPerTan = co.seed+co.fert+co.pest+co.labor;
+      const grossPerTan = crop.yieldPerTan * price * 0.6 / 1000; // 千元
+      const netPerTan = grossPerTan - costPerTan/1000;
+      const gross = grossPerTan * plot.area;
+      const cost  = costPerTan * plot.area / 1000;
+      const net   = gross - cost;
+      totalRevenue += gross;
+      totalCost    += cost;
+
+      const MNAMES=['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+      const netClass = net>0?'hi':net>-5?'med':'lo';
+      const wr=WIN_RATE[crop.name];
+      rows.push(`<tr>
+        <td>${plot.name}</td>
+        <td>${crop.name}</td>
+        <td>${MNAMES[plantMonth]} → ${MNAMES[harvestMonth]}</td>
+        <td class="num">${price.toFixed(0)} 元/kg</td>
+        <td class="num">${(crop.yieldPerTan*plot.area).toLocaleString()} kg</td>
+        <td class="num">${gross.toFixed(1)} 千</td>
+        <td class="num lo">${cost.toFixed(1)} 千</td>
+        <td class="num ${netClass}">${net.toFixed(1)} 千</td>
+        <td class="num" style="color:var(--cyan)">${wr?wr.win:'-'}%</td>
+      </tr>`);
+    });
   });
 
-  table.innerHTML = `<thead><tr>
-    <th>作物</th><th>種植 → 收成</th><th>均價</th><th>預估產量</th>
-    <th class="num">估計收益（${area}分地）</th><th class="num">模型勝率</th>
-  </tr></thead><tbody>${rows.join('')}</tbody>
-  <tfoot><tr style="border-top:2px solid var(--border)">
-    <td colspan="4" style="color:var(--muted);font-size:12px;padding:12px">
-      ※ 收益 = 產量 × 均價 × 良率60%，未含工資、肥料、農藥等成本。實際收益依天候、管理差異而異。
-    </td>
-  </tr></tfoot>`;
+  const totalNet = totalRevenue - totalCost;
+  document.getElementById('netTable').innerHTML = `
+    <thead><tr>
+      <th>地塊</th><th>作物</th><th>種 → 收</th><th>均價</th><th>總產量</th>
+      <th class="num">毛收入</th><th class="num">成本</th><th class="num">淨利</th><th class="num">模型勝率</th>
+    </tr></thead>
+    <tbody>${rows.join('')}</tbody>
+    <tfoot><tr>
+      <td colspan="5">全年合計</td>
+      <td class="num">${totalRevenue.toFixed(1)} 千</td>
+      <td class="num lo">${totalCost.toFixed(1)} 千</td>
+      <td class="num ${totalNet>0?'hi':'lo'}">${totalNet.toFixed(1)} 千元</td>
+      <td></td>
+    </tr></tfoot>`;
 }
 
-// 頁面載入後自動執行一次
-window.onload = () => runPlanner();
+// ── 初始化 ───────────────────────────────────────────────────
+addPlot('地塊 A', 3, 'loam', 6.5);
+addPlot('地塊 B', 2, 'sandy', 6.0);
+renderCostsTable();
 </script>
 </body>
 </html>
